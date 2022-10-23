@@ -32,21 +32,24 @@ contract UnstoppableLender is ReentrancyGuard {
     }
 
     function flashLoan(uint256 borrowAmount) external nonReentrant {
+        // Meet
         if (borrowAmount == 0) revert MustBorrowOneTokenMinimum();
 
         uint256 balanceBefore = damnValuableToken.balanceOf(address(this));
+        // Meet
         if (balanceBefore < borrowAmount) revert NotEnoughTokensInPool();
 
         // Ensured by the protocol via the `depositTokens` function
+        // Trigger that after exploit
         if (poolBalance != balanceBefore) revert AssertionViolated();
 
         damnValuableToken.transfer(msg.sender, borrowAmount);
-
+        
         IReceiver(msg.sender).receiveTokens(
             address(damnValuableToken),
             borrowAmount
         );
-
+        
         uint256 balanceAfter = damnValuableToken.balanceOf(address(this));
         if (balanceAfter < balanceBefore) revert FlashLoanHasNotBeenPaidBack();
     }

