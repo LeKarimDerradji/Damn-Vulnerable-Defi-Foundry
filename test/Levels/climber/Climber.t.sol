@@ -88,7 +88,8 @@ contract Climber is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-
+        vm.startPrank(attacker);
+        vm.stopPrank();
         /** EXPLOIT END **/
         validation();
     }
