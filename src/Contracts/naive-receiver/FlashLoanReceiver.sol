@@ -25,7 +25,7 @@ contract FlashLoanReceiver {
         if (msg.sender != pool) revert SenderMustBePool();
         // attacker can only control msg.value. 
         uint256 amountToBeRepaid = msg.value + fee;
-        
+
         if (address(this).balance < amountToBeRepaid)
             revert CannotBorrowThatMuch();
 
@@ -36,7 +36,9 @@ contract FlashLoanReceiver {
     }
 
     // Internal function where the funds received are used
-    function _executeActionDuringFlashLoan() internal {}
+    function _executeActionDuringFlashLoan() internal {
+        
+    }
 
     // Allow deposits of ETH
     receive() external payable {}

