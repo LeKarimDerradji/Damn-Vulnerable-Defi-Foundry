@@ -15,7 +15,7 @@ interface ISideEntranceLenderPool {
  * @title SideEntranceLenderPool
  * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
  */
-contract FlashLoanEtherReciever {
+contract FlashLoanEtherReceiver {
     using Address for address payable;
 
     address private _vulnerableContract;

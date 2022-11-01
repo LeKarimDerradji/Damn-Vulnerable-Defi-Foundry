@@ -5,6 +5,8 @@ import {Utilities} from "../../utils/Utilities.sol";
 import "forge-std/Test.sol";
 
 import {SideEntranceLenderPool} from "../../../src/Contracts/side-entrance/SideEntranceLenderPool.sol";
+import {FlashLoanEtherReceiver} from "../../../src/Contracts/side-entrance/FlashLoanEtherReceiver.sol";
+
 
 contract SideEntrance is Test {
     uint256 internal constant ETHER_IN_POOL = 1_000e18;
