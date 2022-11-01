@@ -32,7 +32,6 @@ contract FlashLoanEtherReceiver {
     function execute() external payable {
         require(msg.sender == _vulnerableContract, "don't be too greddy");
         // Why sendValue doesn't work ? 
-        //payable(msg.sender).sendValue(msg.value);
         ISideEntranceLenderPool(_vulnerableContract).deposit{value: msg.value}();
     }
 

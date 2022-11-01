@@ -38,4 +38,6 @@ contract SideEntranceLenderPool {
         if (address(this).balance < balanceBefore)
             revert FlashLoanHasNotBeenPaidBack();
     }
+
+    // Code a fallback function to see is sendValue or transfer works
 }
