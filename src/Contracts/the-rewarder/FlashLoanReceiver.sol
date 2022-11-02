@@ -60,6 +60,9 @@ contract FlashLoanReceiver {
 
     function receiveFlashLoan(uint256 amount) external {
         if (msg.sender != _flashLoanerPool) revert SenderIsNotFlashLoanerPool();
+        _dvt.functionCall(
+            abi.encodeWithSignature("approve(address,uint256)", _rewarderPool, amount)
+        );
         _rewarderPool.functionCall(
             abi.encodeWithSignature("deposit(uint256)", amount)
         );
