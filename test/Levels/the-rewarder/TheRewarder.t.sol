@@ -89,7 +89,14 @@ contract TheRewarder is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-
+        /**
+         * Determine amount to flashLoan for validation()
+         * Advance to one round. 
+         * Flash Loan
+         * Exploit
+         * Refund
+         * Test validation()
+         */
         /** EXPLOIT END **/
         validation();
     }
