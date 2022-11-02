@@ -45,7 +45,12 @@ contract Selfie is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-
+         /** Plan
+         * deploy receiver
+         * func flashLoanAttack() -->
+         * call 
+         * 
+         */
         /** EXPLOIT END **/
         validation();
     }
