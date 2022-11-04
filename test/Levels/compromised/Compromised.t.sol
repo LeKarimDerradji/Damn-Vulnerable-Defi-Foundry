@@ -90,6 +90,7 @@ contract Compromised is Test {
         vm.prank(0xe92401A4d3af5E446d93D11EEc806b1462b39D15);
         trustfulOracle.postPrice("DVNFT", INITIAL_NFT_PRICE);
         vm.startPrank(attacker);
+        console.log(damnValuableNFT.balanceOf(attacker));
         damnValuableNFT.approve(address(exchange), 1);
         damnValuableNFT.approve(address(exchange), 2);
         exchange.sellOne(1);
