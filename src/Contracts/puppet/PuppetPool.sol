@@ -47,7 +47,7 @@ contract PuppetPool is ReentrancyGuard {
 
         emit Borrowed(msg.sender, depositRequired, borrowAmount);
     }
-
+    // use that to know when to rekt
     function calculateDepositRequired(uint256 amount)
         public
         view
@@ -55,7 +55,7 @@ contract PuppetPool is ReentrancyGuard {
     {
         return (amount * _computeOraclePrice() * 2) / 10**18;
     }
-
+    // abuse this oracle
     function _computeOraclePrice() private view returns (uint256) {
         // calculates the price of the token in wei according to Uniswap pair
         return (uniswapPair.balance * (10**18)) / token.balanceOf(uniswapPair);

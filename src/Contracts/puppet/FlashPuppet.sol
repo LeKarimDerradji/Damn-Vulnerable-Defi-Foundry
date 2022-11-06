@@ -5,4 +5,12 @@ contract FlashPuppet {
     address private attacker;
     address private puppetPool;
     address private uniswapPool;
+
+    constructor() {
+
+    }
+
+    function attack() external {
+        
+    }
 }
