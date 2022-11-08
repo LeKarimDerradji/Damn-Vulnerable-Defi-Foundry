@@ -119,8 +119,11 @@ contract Puppet is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-
+        /**
+         * 
+         */
         /** EXPLOIT END **/
+        
         validation();
     }
 
