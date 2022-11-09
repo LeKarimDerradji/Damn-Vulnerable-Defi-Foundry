@@ -119,11 +119,11 @@ contract Puppet is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-        /**
-         * 
-         */
+        vm.startPrank(attacker);
+        dvt.approve(address(uniswapExchange), type(uint).max);
+        //uniswapExchange.tokenToEthSwapInput(9, 9e18, DEADLINE);
+        vm.stopPrank();
         /** EXPLOIT END **/
-        
         validation();
     }
 
