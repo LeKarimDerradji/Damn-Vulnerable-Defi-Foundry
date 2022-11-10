@@ -85,6 +85,10 @@ contract HighlyProfitableStrategy {
 
     function attack(uint256 amount) external {
         if (msg.sender != _attacker) revert OnlyAttacker();
+        // approve DVT 
+        // drop price on swap
+        // borrow and rekt 
+        // send to attacker
         IPuppetPool(_puppetPool).borrow(amount);
         
     }
