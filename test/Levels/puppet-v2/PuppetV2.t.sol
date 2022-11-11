@@ -118,7 +118,8 @@ contract PuppetV2 is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-
+        uint256 bait = puppetV2Pool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE);
+        console.log(bait);
         /** EXPLOIT END **/
         validation();
     }
