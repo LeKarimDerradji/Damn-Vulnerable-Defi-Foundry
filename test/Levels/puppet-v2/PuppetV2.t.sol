@@ -51,10 +51,10 @@ contract PuppetV2 is Test {
         // Deploy token to be traded in Uniswap
         dvt = new DamnValuableToken();
         vm.label(address(dvt), "DVT");
-
+        
         weth = new WETH9();
         vm.label(address(weth), "WETH");
-
+ 
         // Deploy Uniswap Factory and Router
         uniswapV2Factory = IUniswapV2Factory(
             deployCode(
