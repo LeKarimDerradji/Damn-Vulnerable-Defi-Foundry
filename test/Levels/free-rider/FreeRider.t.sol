@@ -134,7 +134,7 @@ contract FreeRider is Test {
 
         assertEq(freeRiderNFTMarketplace.amountOfOffers(), AMOUNT_OF_NFTS);
         vm.stopPrank();
-
+        console.log();
         vm.startPrank(buyer);
 
         freeRiderBuyer = new FreeRiderBuyer{value: BUYER_PAYOUT}(
