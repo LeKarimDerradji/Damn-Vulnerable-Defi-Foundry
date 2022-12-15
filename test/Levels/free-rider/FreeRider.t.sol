@@ -150,7 +150,7 @@ contract FreeRider is Test {
     function testExploit() public {
         /** EXPLOIT START **/
         vm.startPrank(attacker, attacker);
-
+        weth.deposit{value: 0.5 ether}();
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
