@@ -1,25 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.12;
 
-import {Address} from "openzeppelin-contracts/utils/Address.sol";
-import {ReentrancyGuard} from "openzeppelin-contracts/security/ReentrancyGuard.sol";
-import {IERC721} from "openzeppelin-contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "openzeppelin-contracts/token/ERC721/IERC721Receiver.sol";
+import {ReentrancyGuard} from "openzeppelin-contracts/security/ReentrancyGuard.sol";
 
-/**
- * @title FreeRiderBuyer
- * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
- */
-contract FreeRiderBuyer is ReentrancyGuard, IERC721Receiver {
-    using Address for address payable;
-    address private immutable partner;
-    IERC721 private immutable nft;
-    uint256 private constant JOB_PAYOUT = 45 ether;
-    uint256 private received;
+contract Attacker is IERC721Receiver, ReentrancyGuard {
+    address private immutable _buyer;
 
-    constructor(address _partner, address _nft) payable {
-        require(msg.value == JOB_PAYOUT);
-        partner = _partner;
+    constructor(address buyer_, address _nft) payable {
+        _buyer = buyer_;
         nft = IERC721(_nft);
         IERC721(_nft).setApprovalForAll(msg.sender, true);
     }
@@ -32,7 +21,7 @@ contract FreeRiderBuyer is ReentrancyGuard, IERC721Receiver {
         bytes memory
     ) external override nonReentrant returns (bytes4) {
         require(msg.sender == address(nft));
-        // This require might be the way to exploit it. 
+        // This require might be the way to exploit it.
         require(tx.origin == partner);
         require(_tokenId >= 0 && _tokenId <= 5);
         require(nft.ownerOf(_tokenId) == address(this));
