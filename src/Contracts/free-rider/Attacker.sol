@@ -34,6 +34,7 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
     uint256 private _received;
 
     constructor(
+        address attacker_,
         address buyer_,
         address nft_,
         address payable marketplace,
@@ -41,6 +42,7 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
         address tokenA,
         address tokenB
     ) payable {
+        _attacker = attacker_;
         _buyer = buyer_;
         _nft = IERC721(nft_);
         IERC721(nft_).setApprovalForAll(msg.sender, true);
@@ -89,7 +91,7 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
     }
 
     // Function to perform the flash swap and buy NFTs
-    function buyNFTs() public payable {}
+    //function buyNFTs() public payable {}
 
     // Read https://eips.ethereum.org/EIPS/eip-721 for more info on this function
     function onERC721Received(
@@ -108,7 +110,7 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
         if (_received == 6) {
             uint256 i;
             for (i = 0; i < _received; i++) {
-                IERC721(_nft).transfer(address(_buyer), i);
+                _nft.transferFrom(address(this), address(_buyer), i);
             }
         }
 
