@@ -4,6 +4,7 @@ pragma solidity 0.8.12;
 import {IERC721Receiver} from "openzeppelin-contracts/token/ERC721/IERC721Receiver.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/security/ReentrancyGuard.sol";
 import {IUniswapV2Router02, IUniswapV2Factory, IUniswapV2Pair} from "../../../src/Contracts/free-rider/Interfaces.sol";
+import {FreeRiderNFTMarketplace} from "../../../src/Contracts/free-rider/FreeRiderNFTMarketplace.sol";
 import {IERC721} from "openzeppelin-contracts/token/ERC721/IERC721.sol";
 
 interface IUniswapV2Callee {
@@ -14,7 +15,6 @@ interface IUniswapV2Callee {
         bytes calldata data
     ) external;
 }
-
 
 contract Attacker is IERC721Receiver, ReentrancyGuard {
     address private immutable _buyer;
