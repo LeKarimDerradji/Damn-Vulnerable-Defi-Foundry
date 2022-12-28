@@ -39,7 +39,7 @@ contract FreeRiderBuyer is ReentrancyGuard, IERC721Receiver {
 
         received++;
         if (received == 6) {
-            payable(partner).sendValue(JOB_PAYOUT);
+            payable(msg.sender).sendValue(JOB_PAYOUT);
         }
 
         return IERC721Receiver.onERC721Received.selector;

