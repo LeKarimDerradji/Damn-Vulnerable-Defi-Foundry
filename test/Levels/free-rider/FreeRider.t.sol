@@ -153,7 +153,7 @@ contract FreeRider is Test {
         /** EXPLOIT START **/
         attackerContract = new Attacker(
             attacker,
-            buyer,
+            address(freeRiderBuyer),
             address(damnValuableNFT),
             payable(freeRiderNFTMarketplace),
             address(uniswapV2Factory),

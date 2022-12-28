@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.12;
 
+import "forge-std/Test.sol";
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/security/ReentrancyGuard.sol";
 import {IERC721} from "openzeppelin-contracts/token/ERC721/IERC721.sol";
@@ -25,21 +26,20 @@ contract FreeRiderBuyer is ReentrancyGuard, IERC721Receiver {
     }
 
     // Read https://eips.ethereum.org/EIPS/eip-721 for more info on this function
-    function onERC721Received(
-        address,
-        address,
-        uint256 _tokenId,
-        bytes memory
-    ) external override nonReentrant returns (bytes4) {
+    function onERC721Received(address, address, uint256 _tokenId, bytes memory)
+        external
+        override
+        nonReentrant
+        returns (bytes4)
+    {
         require(msg.sender == address(nft));
-        // This require might be the way to exploit it. 
         require(tx.origin == partner);
         require(_tokenId >= 0 && _tokenId <= 5);
         require(nft.ownerOf(_tokenId) == address(this));
 
         received++;
         if (received == 6) {
-            payable(msg.sender).sendValue(JOB_PAYOUT);
+            payable(partner).sendValue(JOB_PAYOUT);
         }
 
         return IERC721Receiver.onERC721Received.selector;
