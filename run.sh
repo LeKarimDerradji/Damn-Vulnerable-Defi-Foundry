@@ -44,7 +44,7 @@ case $1 in
     ;;
 
   free-rider | 10 | free)
-    forge test --match-contract FreeRider
+    forge test --match-contract --vvvvv FreeRider 
     ;;
 
   backdoor | 11 | back)

