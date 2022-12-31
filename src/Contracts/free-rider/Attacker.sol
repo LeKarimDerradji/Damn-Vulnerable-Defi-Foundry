@@ -34,7 +34,6 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
     WETH9 internal weth;
 
     IERC721 private immutable _nft;
-    uint256 private _received;
 
     constructor(
         address attacker_,
