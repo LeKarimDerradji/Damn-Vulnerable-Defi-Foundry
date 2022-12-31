@@ -79,8 +79,6 @@ contract Attacker is IERC721Receiver, ReentrancyGuard {
             (address, address)
         );
 
-        console.log("caller", caller);
-
         // Your custom code would go here. For example, code to arbitrage.
         require(tokenBorrow == address(weth), "token borrow != WETH");
 
