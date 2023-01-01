@@ -77,7 +77,9 @@ contract Backdoor is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-
+        vm.startPrank(attacker);
+        walletFactory.createProxy();
+        vm.stopPrank();
         /** EXPLOIT END **/
         validation();
     }

@@ -76,7 +76,9 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
     /**
      @notice Function executed when user creates a Gnosis Safe wallet via GnosisSafeProxyFactory::createProxyWithCallback
              setting the registry's address as the callback.
-     */
+    */                                                                                                          
+
+   
     function proxyCreated(
         GnosisSafeProxy proxy,
         address singleton,
