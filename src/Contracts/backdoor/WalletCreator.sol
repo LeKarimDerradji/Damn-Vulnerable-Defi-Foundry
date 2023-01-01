@@ -21,6 +21,10 @@ contract MyContract {
     }
 
     function createGnosisSafeWallet() public {
+        // Generate a unique saltNonce value
+        uint256 saltNonce = uint256(
+            keccak256(abi.encodePacked(block.timestamp, msg.sender))
+        );
         // Call the createProxy function of the GnosisSafeProxyFactory contract
         GnosisSafeProxy proxy = GnosisSafeProxyFactory(gnosisSafeProxyFactory)
             .createProxy(
@@ -31,7 +35,5 @@ contract MyContract {
                     [msg.sender]
                 )
             );
-
-        
     }
 }
