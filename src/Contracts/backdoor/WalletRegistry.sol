@@ -65,6 +65,15 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
     }
 
     /**
+     * When a Gnosis Safe wallet is created through the wallet factory, the contract's proxyCreated
+     * function is called with the address of the new wallet.
+     * This function verifies that the wallet was created using the correct factory,
+     * that the wallet was initialized correctly, and that the owner of the wallet is a registered beneficiary.
+     * If all these checks pass, the contract removes the wallet owner from the list of beneficiaries
+     * and stores the wallet's address under the owner's address in the wallets mapping.
+     * Finally, the contract sends some DVT to the wallet.
+     */
+    /**
      @notice Function executed when user creates a Gnosis Safe wallet via GnosisSafeProxyFactory::createProxyWithCallback
              setting the registry's address as the callback.
      */
