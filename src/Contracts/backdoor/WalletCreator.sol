@@ -36,4 +36,19 @@ contract MyContract {
                 )
             );
     }
+
+     // Encode the data for the GnosisSafe "setup" function call
+        bytes memory initializer = abi.encodeWithSignature("setup(address[],uint256)", owners, threshold);
+
+        // Create a unique nonce for the proxy contract
+        uint256 saltNonce = uint256(keccak256(abi.encodePacked(now, msg.sender)));
+
+        // Call the createProxyWithCallback function to create the proxy contract
+        proxyFactory.createProxyWithCallback(
+            address(GnosisSafe), // The singleton contract
+            initializer, // The initializer data
+            saltNonce, // The nonce
+            address(this) // The callback contract
+        );
+    }
 }
