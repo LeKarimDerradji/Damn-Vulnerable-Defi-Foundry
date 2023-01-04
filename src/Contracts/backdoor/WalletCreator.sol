@@ -6,7 +6,7 @@ import {GnosisSafeProxyFactory} from "gnosis/proxies/GnosisSafeProxyFactory.sol"
 import {WalletRegistry} from "./WalletRegistry.sol";
 
 // Your contract
-contract MyContract {
+contract WalletCreator {
     // Address of the Gnosis Safe master copy contract
     address immutable gnosisSafeMasterCopy;
 
