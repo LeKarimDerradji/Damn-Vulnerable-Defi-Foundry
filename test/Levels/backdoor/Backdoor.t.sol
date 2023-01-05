@@ -81,6 +81,7 @@ contract Backdoor is Test {
         /** EXPLOIT START **/
         vm.startPrank(attacker);
         walletCreator = new WalletCreator(address(masterCopy), address(walletFactory), walletRegistry);
+        walletCreator.createGnosisSafeWallet();
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
