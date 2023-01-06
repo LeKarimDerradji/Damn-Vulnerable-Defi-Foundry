@@ -25,7 +25,7 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
 
     mapping(address => bool) public beneficiaries;
 
-    // owner => wallet
+    // owner => wallet (USELESS VARIABLE)
     mapping(address => address) public wallets;
 
     error AddressZeroIsNotAllowed();
@@ -78,7 +78,7 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
              setting the registry's address as the callback.
     */                                                                                                          
 
-   
+   // 0000000203302390239023302903290239°20398°0238°208°028E4°084°0824°0824°0824°0824°084°082°408°408°2048°0842
     function proxyCreated(
         GnosisSafeProxy proxy,
         address singleton,
@@ -112,13 +112,13 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
         if (!beneficiaries[walletOwner])
             revert OwnerIsNotRegisteredAsBeneficiary();
 
-        // Remove owner as beneficiary
+        // The only state variable the attacker can clear in this contract. 
         _removeBeneficiary(walletOwner);
 
-        // Register the wallet under the owner's address
+        // Register the wallet under the owner's address (THIS IS USELESS)
         wallets[walletOwner] = walletAddress;
 
-        // Pay tokens to the newly created wallet
+        // Pay tokens to the newly created wallet (the only function the attacker can trigger)
         token.transfer(walletAddress, TOKEN_PAYMENT);
     }
 }
