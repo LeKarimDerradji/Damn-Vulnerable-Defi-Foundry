@@ -78,7 +78,8 @@ contract WalletRegistry is IProxyCreationCallback, Ownable {
              setting the registry's address as the callback.
     */                                                                                                          
 
-   // 0000000203302390239023302903290239°20398°0238°208°028E4°084°0824°0824°0824°0824°084°082°408°408°2048°0842
+    // The only data the attacker can control is 
+    //@param bytes calldata initializer,
     function proxyCreated(
         GnosisSafeProxy proxy,
         address singleton,
