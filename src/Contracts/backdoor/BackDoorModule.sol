@@ -4,6 +4,16 @@ import {ModuleManager} from "gnosis/base/ModuleManager.sol";
 import {Enum} from "gnosis/common/Enum.sol";
 import {GnosisSafe} from "gnosis/GnosisSafe.sol";
 
+ /**
+ *@notice
+ * The challenge is called backdoor because it's possible to implement a backdoor on the deployment of a 
+ * new wallet, by attaching it to a module. 
+ * On the same transaction, and before it finishes, the malicious actor can passes data that can alter the 
+ * states of the Gnosis Safe wallet. 
+ * Now the question is, what data to passes by, in order to steal the funds from 4 contracts
+ * In the same transaction. 
+ */
+
 contract ControllerModule is ModuleManager {
 
     GnosisSafe internal proxy;
