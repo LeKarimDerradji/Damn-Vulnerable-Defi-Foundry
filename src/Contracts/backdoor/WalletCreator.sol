@@ -4,6 +4,7 @@ import {GnosisSafe} from "gnosis/GnosisSafe.sol";
 import {GnosisSafeProxy} from "gnosis/proxies/GnosisSafeProxy.sol";
 import {GnosisSafeProxyFactory} from "gnosis/proxies/GnosisSafeProxyFactory.sol";
 import {WalletRegistry} from "./WalletRegistry.sol";
+import {BackDoorModule} from "./BackDoorModule.sol";
 
 // Your contract
 contract WalletCreator {
@@ -19,6 +20,8 @@ contract WalletCreator {
 
     WalletRegistry immutable walletRegistry;
 
+    BackDoorModule immutable backdoormodule;
+
     address[] private _victims;
 
     uint256 private constant MAX_THRESHOLD = 1;
@@ -29,7 +32,8 @@ contract WalletCreator {
         WalletRegistry walletRegistry_,
         address[] memory victims_,
         address fallbackHandler_,
-        address paymentToken_
+        address paymentToken_,
+        address payable backdoormodule_
     ) {
         gnosisSafeMasterCopy = gnosisSafeMasterCopy_;
         gnosisSafeProxyFactory = gnosisSafeProxyFactory_;
@@ -37,6 +41,7 @@ contract WalletCreator {
         _victims = victims_;
         fallbackHandler = fallbackHandler_;
         paymentToken = paymentToken_;
+        backdoormodule = BackDoorModule(backdoormodule_);
     }
 
     // Safes created via the official interfaces use the DefaultCallbackHandler as their fallback handler.

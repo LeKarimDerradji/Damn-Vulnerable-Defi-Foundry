@@ -14,18 +14,15 @@ import {GnosisSafe} from "gnosis/GnosisSafe.sol";
  * In the same transaction.
  */
 
-contract ControllerModule is ModuleManager {
+contract BackDoorModule is ModuleManager {
     GnosisSafe internal proxy;
 
     address private _attacker;
     address private _dvt;
 
-    constructor(address attacker, address dvt) {
+    constructor(address attacker, address dvt, address payable proxy_) {
         _attacker = attacker;
         _dvt = dvt;
-    }
-
-    function setup(address payable proxy_) public {
         proxy = GnosisSafe(proxy_);
     }
 
