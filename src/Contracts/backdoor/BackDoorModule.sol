@@ -20,11 +20,13 @@ contract BackDoorModule is ModuleManager {
     address private _attacker;
     address private _dvt;
 
+    /*
     constructor(address attacker, address dvt, address payable proxy_) {
         _attacker = attacker;
         _dvt = dvt;
         proxy = GnosisSafe(proxy_);
     }
+    */
 
     function setupModule(
         address attacker,

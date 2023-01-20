@@ -40,7 +40,7 @@ contract WalletCreator {
     ) {
         gnosisSafeMasterCopy = gnosisSafeMasterCopy_;
         gnosisSafeProxyFactory = gnosisSafeProxyFactory_;
-        _backdoormodule = backdoormodule_;
+        _backdoormodule = BackDoorModule(backdoormodule_);
         walletRegistry = walletRegistry_;
         _victims = victims_;
         fallbackHandler = fallbackHandler_;
@@ -64,7 +64,7 @@ contract WalletCreator {
                 MAX_THRESHOLD,
                 address(_backdoormodule),
                 0x0,
-                fallbackHandler,
+                address(0),
                 address(0),
                 0,
                 address(0)
