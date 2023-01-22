@@ -5,9 +5,7 @@ import {GnosisSafeProxy} from "gnosis/proxies/GnosisSafeProxy.sol";
 import {GnosisSafeProxyFactory} from "gnosis/proxies/GnosisSafeProxyFactory.sol";
 import {IProxyCreationCallback} from "gnosis/proxies/IProxyCreationCallback.sol";
 import {WalletRegistry} from "./WalletRegistry.sol";
-import {BackDoorModule} from "./BackDoorModule.sol";
 import "../DamnValuableToken.sol";
-import "forge-std/Test.sol";
 
 // Your contract
 contract WalletCreator {
@@ -20,8 +18,6 @@ contract WalletCreator {
     address immutable paymentToken;
 
     WalletRegistry immutable walletRegistry;
-
-    BackDoorModule private _backdoormodule;
 
     address[] public _victims;
 
