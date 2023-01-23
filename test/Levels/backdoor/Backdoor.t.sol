@@ -9,8 +9,6 @@ import {WalletRegistry} from "../../../src/Contracts/backdoor/WalletRegistry.sol
 import {GnosisSafe} from "gnosis/GnosisSafe.sol";
 import {GnosisSafeProxyFactory} from "gnosis/proxies/GnosisSafeProxyFactory.sol";
 import {WalletCreator} from "../../../src/Contracts/backdoor/WalletCreator.sol";
-import {FallBackHandler} from "../../../src/Contracts/backdoor/FallBackHandler.sol";
-
 contract Backdoor is Test {
     uint256 internal constant AMOUNT_TOKENS_DISTRIBUTED = 40e18;
     uint256 internal constant NUM_USERS = 4;
@@ -21,7 +19,6 @@ contract Backdoor is Test {
     GnosisSafeProxyFactory internal walletFactory;
     WalletRegistry internal walletRegistry;
     WalletCreator internal walletCreator;
-    FallBackHandler internal fallbackhandler;
     address[] internal users;
     address payable internal attacker;
     address internal alice;
