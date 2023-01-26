@@ -72,7 +72,9 @@ contract Climber is Test {
         /**
          * EXPLOIT START *
          */
-
+        vm.startPrank(attacker);
+        climberTimelock.grantRole(climberTimelock.ADMIN_ROLE(), attacker);
+        vm.stopPrank();
         /**
          * EXPLOIT END *
          */
