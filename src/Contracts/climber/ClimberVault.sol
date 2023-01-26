@@ -29,10 +29,10 @@ contract ClimberVault is Initializable, OwnableUpgradeable, UUPSUpgradeable {
     constructor() initializer {}
 
     function initialize(
-        address admin,
-        address proposer,
-        address sweeper
-    ) external  {
+        address payable admin,
+        address payable proposer,
+        address payable sweeper
+    ) external initializer {
         // Initialize inheritance chain
         __Ownable_init();
         __UUPSUpgradeable_init();

@@ -3,12 +3,14 @@ pragma solidity 0.8.12;
 
 import {AccessControl} from "openzeppelin-contracts/access/AccessControl.sol";
 import {Address} from "openzeppelin-contracts/utils/Address.sol";
+import {Initializable} from "openzeppelin-contracts-upgradeable/proxy/utils/Initializable.sol";
+
 
 /**
  * @title ClimberTimelock
  * @author Damn Vulnerable DeFi (https://damnvulnerabledefi.xyz)
  */
-contract ClimberTimelock is AccessControl {
+contract ClimberTimelock is AccessControl, Initializable {
     using Address for address;
 
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
