@@ -92,14 +92,14 @@ contract Climber is Test {
 
     function testExploit() public {
 
-        attackerContract = new Attacker(
-            payable(address(climberTimelock)),
-            address(climberVaultProxy),
-            address(attacker),
-            address(dvt)
-        );
+       
 
         vm.startPrank(attacker);
+         attackerContract = new Attacker(
+            payable(address(climberTimelock)),
+            address(climberVaultProxy),
+            dvt
+        );
         attackerContract.attack();
         vm.stopPrank();
 
