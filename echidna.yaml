@@ -1,0 +1,3 @@
+# provide solc remappings to crytic-compile
+cryticArgs: ['--solc-remaps', 'openzeppelin-contracts-upgradeable/proxy/=lib/openzeppelin-contracts-upgradeable/contracts/proxy/ openzeppelin-contracts-upgradeable/access/=lib/openzeppelin-contracts-upgradeable/contracts/access/
+openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/']

