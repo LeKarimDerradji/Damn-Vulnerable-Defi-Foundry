@@ -36,7 +36,7 @@ contract WETH10 is ERC20("Messi Wrapped Ether", "WETH10"), ReentrancyGuard {
     ) external nonReentrant {
         uint256 prevBalance = address(this).balance;
         Address.functionCallWithValue(receiver, data, amount);
-
+    
         require(
             address(this).balance >= prevBalance,
             "flash loan not returned"

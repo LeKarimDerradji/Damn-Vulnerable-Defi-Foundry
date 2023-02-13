@@ -37,3 +37,6 @@ Climber:
 SafeMiners:
 	forge test --match-test testExploit --match-contract SafeMiners
 
+WETH10:
+	forge test --match-contract WETH10
+
