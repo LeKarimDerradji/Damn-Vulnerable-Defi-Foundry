@@ -2,7 +2,7 @@
   "editor.formatOnSave": true,
   "solidity.formatter": "prettier",
   "[solidity]": {
-    "editor.defaultFormatter": "NomicFoundation.hardhat-solidity"
+    "editor.defaultFormatter": "JuanBlanco.solidity"
   },
   "solidity.compileUsingRemoteVersion": "v0.8.12+commit.f00d7308"
 }

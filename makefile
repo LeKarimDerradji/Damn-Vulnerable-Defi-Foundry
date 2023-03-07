@@ -38,5 +38,5 @@ SafeMiners:
 	forge test --match-test testExploit --match-contract SafeMiners
 
 WETH10:
-	forge test --match-contract WETH10
+	forge test -vvvvvv --match-test testHack --match-contract Weth10
 
